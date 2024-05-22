@@ -1,8 +1,9 @@
-import { useParams } from "react-router-dom"
+import { useNavigate, useParams } from "react-router-dom"
 import Navbar from "../components/Navbar"
 import "../styles/FormPage.css"
 import { ChangeEvent, useState } from "react"
 import { FormAnswer } from "../types/FormAnswer"
+import { api } from "../api"
 
 export const areas = [{
     name: 'רמת הגולן', value: 'ramatHagolan'
@@ -35,6 +36,7 @@ export const areas = [{
 },]
 
 function FormPage() {
+    const navigate = useNavigate();
     const { purpose } = useParams()
 
     const [formAnswer, setFormAnswer] = useState<FormAnswer>({ email: '', fullname: '', phone: '', area: [] })
@@ -55,11 +57,13 @@ function FormPage() {
         }
     };
 
-    const submitForm = () => {
+    const submitForm = async () => {
         if (purpose === "offer") {
-            //POST backend/offer
+            await api().offers().create(formAnswer)
+            navigate("/")
         } else {
-            //POST backend/request
+            await api().requests().create(formAnswer)
+            navigate("/")
         }
         console.log(formAnswer);
     }
