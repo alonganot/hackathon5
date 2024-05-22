@@ -1,3 +1,4 @@
+import { Link } from "react-router-dom"
 import Navbar from "../components/Navbar"
 
 function HomePage() {
@@ -15,6 +16,9 @@ function HomePage() {
         <>
             <Navbar />
             <h4>{homeText}</h4>
+            <Link id="route-link" to={"/form/offer"}>לסיוע</Link>
+            <Link id="route-link" to={"/form/request"}>לבקשת עזרה</Link>
+ 
         </>
     )
 }
