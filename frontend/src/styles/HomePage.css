@@ -1,4 +1,32 @@
+@font-face {
+    font-family: Heebo;
+    src: url(fonts/Heebo-VariableFont_wght.ttf);
+}
+
 #main-grid {
     display: grid;
-    grid-template-columns: repeat(2, 1fr);
+    height: 400px;
+    padding: 40px;
+    grid-template-columns: repeat(3, 1fr);
+    align-items: center;
+}
+
+.brown{
+    height: 200px;
+    width: 120px;
+    border-radius: 20px;
+    background-color:   #E9DDBF;
+    position: absolute;
+}
+
+.text{
+    font-family: Heebo;
+    font-weight: 700;
+}
+
+.buttons{
+    display: flex;
+    position: absolute;
+    left: 80px;
+    bottom: 40px;
 }
