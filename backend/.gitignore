@@ -1,0 +1,15 @@
+# Python generated files
+__pycache__
+*.pyc
+
+# Pycharm/PyDev development files
+workspace.xml
+.idea
+.vscode
+
+# Environments
+.env
+.venv
+env/
+venv/
+ENV/
