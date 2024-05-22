@@ -1,5 +1,7 @@
 import { useEffect, useState } from "react"
 import Navbar from "../components/Navbar"
+import { FormAnswer } from "../types/FormAnswer"
+import { areas } from "./FormPage"
 
 function AdminPage() {
 
@@ -26,10 +28,10 @@ function AdminPage() {
   )
 }
 
-function Lists(password){
-  const [offerEntries, setOfferEntries] = useState()
-  const [requestEntries, setRequestEntries] = useState()
-  const [regionalFilter, setRegionalFilter]= useState()
+function Lists({password}: {password: string}){
+  const [offerEntries, setOfferEntries] = useState<FormAnswer[]>([])
+  const [requestEntries, setRequestEntries] = useState<FormAnswer[]>([])
+  const [regionalFilter, setRegionalFilter]= useState<string[]>([])
   useEffect(()=>{
     //send request to api file
     fetch('backend/admin/password')
@@ -38,7 +40,7 @@ function Lists(password){
     })
     .then(data=>{setOfferEntries(data)})
   },[])
-    if (offerEntries === 'wrong password')
+  if (offerEntries[0].description === 'wrong password')
     return(<div>wrong password</div>)
 
   return (
@@ -57,22 +59,20 @@ function Lists(password){
       </div>
 
 
-      <h2>Volunteer List</h2>
+      <h2>offer List</h2>
       <ul>
-        offerEntries.filter(offer=> !regionalFilter  || offer.regions.some(relevantRegion =>  regionalFilter.includes(relevantRegion)))
+       { offerEntries.filter(offer=> !regionalFilter  || offer.area.some(relevantRegion =>  regionalFilter.includes(relevantRegion)))
         .map((item, index)=>(
-          <li key = {index}>{item.content}</li>
-          {/* item.content needs to be replaced with formatting - name area contact info title and text */}
-        ))
+          <li key = {index}>{item.email}</li>
+        ))}
       </ul>
 
       <h2>Request List</h2>
       <ul>
-      requestEntries.filter(request=> !regionalFilter || request.regions.some(relevantRegion=>  regionalFilter.includes(relevantRegion)))
+      {requestEntries.filter(request=> !regionalFilter || request.area.some(relevantRegion=>  regionalFilter.includes(relevantRegion)))
       .map((item, index) => (
-          <li key = {index}>{item.content}</li>
-          {/* item.content needs to be replaced with formatting */}
-        ))
+          <li key = {index}>{item.email}</li>
+        ))}
       </ul>
     </>
   )

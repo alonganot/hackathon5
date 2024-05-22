@@ -4,37 +4,39 @@ import "../styles/FormPage.css"
 import { ChangeEvent, useState } from "react"
 import { FormAnswer } from "../types/FormAnswer"
 
+export const areas = [{
+    name: 'רמת הגולן', value: 'ramatHagolan'
+}, {
+    name: 'גליל עליון', value: 'galilElion'
+}, {
+    name: 'גליל תחתון', value: 'galilTahton'
+}, {
+    name: 'חיפה', value: 'haifa'
+}, {
+    name: 'השומרון', value: 'hashomron'
+}, {
+    name: 'השרון', value: 'hasharon'
+}, {
+    name: 'גוש דן', value: 'gushDan'
+}, {
+    name: 'ירושלים', value: 'jerusalem'
+}, {
+    name: 'עוטף עזה', value: 'otefAza'
+}, {
+    name: 'הרי יהודה', value: 'hareiYehuda'
+}, {
+    name: 'הנגב', value: 'hanegev'
+}, {
+    name: 'הערבה', value: 'haarava'
+}, {
+    name: 'מדבר יהודה', value: 'midbarYehuda'
+}, {
+    name: 'אילת', value: 'eilat'
+},]
+
 function FormPage() {
     const { purpose } = useParams()
-    const areas = [{
-        name: 'רמת הגולן', value: 'ramatHagolan'
-    }, {
-        name: 'גליל עליון', value: 'galilElion'
-    }, {
-        name: 'גליל תחתון', value: 'galilTahton'
-    }, {
-        name: 'חיפה', value: 'haifa'
-    }, {
-        name: 'השומרון', value: 'hashomron'
-    }, {
-        name: 'השרון', value: 'hasharon'
-    }, {
-        name: 'גוש דן', value: 'gushDan'
-    }, {
-        name: 'ירושלים', value: 'jerusalem'
-    }, {
-        name: 'עוטף עזה', value: 'otefAza'
-    }, {
-        name: 'הרי יהודה', value: 'hareiYehuda'
-    }, {
-        name: 'הנגב', value: 'hanegev'
-    }, {
-        name: 'הערבה', value: 'haarava'
-    }, {
-        name: 'מדבר יהודה', value: 'midbarYehuda'
-    }, {
-        name: 'אילת', value: 'eilat'
-    },]
+
     const [formAnswer, setFormAnswer] = useState<FormAnswer>({ email: '', fullname: '', phone: '', area: [] })
 
     const handleChange = (event: ChangeEvent<HTMLInputElement>) => {
