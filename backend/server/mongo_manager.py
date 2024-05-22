@@ -1,4 +1,5 @@
 from json import load
+from pathlib import Path
 from typing import Optional
 from logging import getLogger
 from pymongo import MongoClient
@@ -13,7 +14,8 @@ mongo_log = getLogger(__name__)
 
 class MongoDBContextManager:
     def __init__(self, applicant_type: str) -> None:
-        with open('config.json') as config_file:
+        current_dir: Path = Path(__file__).parent
+        with open(current_dir.joinpath('config.json')) as config_file:
             config = load(config_file)
 
         self.host: str = config['MONGO_URI']
