@@ -27,26 +27,40 @@ function AdminPage() {
 }
 
 function Lists(password){
-  const [entries, setEntries] = useState()
-
+  const [offerEntries, setOfferEntries] = useState()
+  const [requestEntries, setRequestEntries] = useState()
+  const [regionalFilter, setRegionalFilter]= useState()
   useEffect(()=>{
+    //send request to api file
     fetch('backend/admin/password')
     .then(res=>{return res.json()
 
     })
-    .then(data=>{setEntries(data)})
+    .then(data=>{setOfferEntries(data)})
   },[])
-    if (entries === 'wrong password')
+    if (offerEntries === 'wrong password')
     return(<div>wrong password</div>)
-
-    const volunteerList = entries.filter(item=> item.volunteer === 'true')//instead of filter, index res
-    const requestList = entries.filter(item=> item.volunteer === 'false')
 
   return (
     <>
+    {/* this is copypaste for checking boxes  */}
+       <div>
+          <p>איזור בארץ</p>
+          <div id="areas">
+              {areas.map((area, index) => (
+                  <div key={index} style={{ width: "33%" }}>
+                      <input type="checkbox" id={area.value} name="area" value={area.value} onChange={handleChange} />
+                      <label htmlFor={area.value}>{area.name}</label><br />
+                  </div>
+              ))}
+          </div>
+      </div>
+
+
       <h2>Volunteer List</h2>
       <ul>
-        volunteerList.map((item, index)=>(
+        offerEntries.filter(offer=> !regionalFilter  || offer.regions.some(relevantRegion =>  regionalFilter.includes(relevantRegion)))
+        .map((item, index)=>(
           <li key = {index}>{item.content}</li>
           {/* item.content needs to be replaced with formatting - name area contact info title and text */}
         ))
@@ -54,7 +68,8 @@ function Lists(password){
 
       <h2>Request List</h2>
       <ul>
-        requestList.map((item, index)=>(
+      requestEntries.filter(request=> !regionalFilter || request.regions.some(relevantRegion=>  regionalFilter.includes(relevantRegion)))
+      .map((item, index) => (
           <li key = {index}>{item.content}</li>
           {/* item.content needs to be replaced with formatting */}
         ))
