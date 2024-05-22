@@ -1,11 +1,14 @@
 import Navbar from "../components/Navbar"
 
 function FormPage() {
-
     return (
         <>
             <Navbar />
-            <h1>Form</h1>
+            <label htmlFor="first">שם מלא</label>
+            <input name="first" />
+            <label htmlFor="last">שם מלhא</label>
+            <input name="last" />
+            <button type="submit">Search</button>
         </>
     )
 }
