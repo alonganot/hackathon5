@@ -27,7 +27,7 @@ class BackendRestServer:
         self.cors_app = CORS(self.app, origins=BackendRestServer.CORS_ORIGINS)
         self.cors_app.init_app(self.app)
 
-    def setup_routes(self):
+    def setup_routes(self) -> None:
         self.app.add_url_rule('/applicants/all',
                               view_func=self.get_all_applicants,
                               methods=['GET'])
