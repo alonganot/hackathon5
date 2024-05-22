@@ -1,11 +1,11 @@
+from typing import Optional
 from http import HTTPStatus
 from logging import getLogger
-from typing import Any, Optional
 from bson import json_util, ObjectId
 
 from flask_cors import CORS
 from pymongo.errors import PyMongoError
-from flask import Flask, jsonify, request
+from flask import Flask, jsonify, request, Response
 
 from mongo_manager import MongoDBContextManager
 
@@ -28,7 +28,7 @@ class BackendRestServer:
         self.cors_app.init_app(self.app)
 
     def setup_routes(self) -> None:
-        self.app.add_url_rule('/applicants/all',
+        self.app.add_url_rule('/applicants/all/<string:applicant_area>',
                               view_func=self.get_all_applicants,
                               methods=['GET'])
         self.app.add_url_rule('/applicants/<string:applicant_type>',
@@ -63,7 +63,7 @@ class BackendRestServer:
         return {'_id': object_id}
 
     def get_all_applicants(self,
-                           applicant_area: Optional[str] = None) -> tuple[tuple[dict[str, Any], dict[str, Any]], HTTPStatus]:
+                           applicant_area: Optional[str] = None) -> tuple[Response, HTTPStatus]:
         with MongoDBContextManager('requests') as mongo:
             area_filter = self.create_area_filter(applicant_area)
             requests_data = list(mongo.collection.find(area_filter))
@@ -71,13 +71,14 @@ class BackendRestServer:
             mongo.set_collection('offers')
             offers_data = list(mongo.collection.find(area_filter))
 
-            all_data = ({'requests_data_list': requests_data}, {'offers_data_list': offers_data})
+            all_data = jsonify({'requests_data_list': requests_data,
+                                'offers_data_list': offers_data})
             
         return all_data, HTTPStatus.OK
 
     def get_applicants(self,
                        applicant_type: str,
-                       applicant_area: Optional[str] = None) -> tuple[dict[str, Any], HTTPStatus]:
+                       applicant_area: Optional[str] = None) -> tuple[Response, HTTPStatus]:
         with MongoDBContextManager(applicant_type) as mongo:
             data_list = {'data_list': list(mongo.collection.find(self.create_area_filter(applicant_area)))}
 
@@ -86,8 +87,8 @@ class BackendRestServer:
 
         return jsonify(json_util.dumps(data_list)), HTTPStatus.OK
 
-    def add_applicant(self,
-                      applicant_type: str) -> tuple[dict[str, Any], HTTPStatus]:
+    @staticmethod
+    def add_applicant(applicant_type: str) -> tuple[Response, HTTPStatus]:
         with MongoDBContextManager(applicant_type) as mongo:
             try:
                 mongo.collection.insert_one(request.json)
@@ -95,9 +96,11 @@ class BackendRestServer:
                 server_log.exception(exception)
                 return jsonify({'Exception': exception}), HTTPStatus.BAD_REQUEST
             
-        return jsonify({'Exception': f'{'Created successfuly'}'}), HTTPStatus.CREATED
+        return jsonify({'Exception': 'Created successfully'}), HTTPStatus.CREATED
 
-    def update_applicant(self, applicant_type: str, serialized_object_id: str):
+    def update_applicant(self,
+                         applicant_type: str,
+                         serialized_object_id: str) -> tuple[Response, HTTPStatus]:
         with MongoDBContextManager(applicant_type) as mongo:
             try:
                 mongo.collection.find_one_and_replace(self.create_object_filter(serialized_object_id), request.json)
@@ -105,9 +108,11 @@ class BackendRestServer:
                 server_log.exception(exception)
                 return jsonify({'Exception': exception}), HTTPStatus.BAD_REQUEST
 
-        return jsonify({'Exception': f'{'Updated successfuly'}'}), HTTPStatus.OK
+        return jsonify({'Exception': 'Updated successfully'}), HTTPStatus.OK
 
-    def delete_applicant(self, applicant_type: str, object_id: str):
+    def delete_applicant(self,
+                         applicant_type: str,
+                         object_id: str) -> tuple[Response, HTTPStatus]:
         with MongoDBContextManager(applicant_type) as mongo:
             try:
                 mongo.collection.delete_one(self.create_object_filter(object_id))
@@ -115,9 +120,11 @@ class BackendRestServer:
                 server_log.exception(exception)
                 return jsonify({'Exception': exception}), HTTPStatus.BAD_REQUEST
 
-        return jsonify({'Exception': f'{'Deleted successfuly'}'}), HTTPStatus.OK
+        return jsonify({'Exception': 'Deleted successfully'}), HTTPStatus.OK
 
-    def patch_applicant(self, applicant_type: str, serialized_object_id: str):
+    def patch_applicant(self,
+                        applicant_type: str,
+                        serialized_object_id: str) -> tuple[Response, HTTPStatus]:
         with MongoDBContextManager(applicant_type) as mongo:
             try:
                 mongo.collection.find_one_and_update(self.create_object_filter(serialized_object_id), request.json)
@@ -125,7 +132,7 @@ class BackendRestServer:
                 server_log.exception(exception)
                 return jsonify({'Exception': exception}), HTTPStatus.BAD_REQUEST
 
-        return jsonify({'Exception': f'{'Updated successfuly'}'}), HTTPStatus.OK
+        return jsonify({'Exception': f'{'Updated successfully'}'}), HTTPStatus.OK
 
     def run(self) -> None:
         self.app.run(host=BackendRestServer.IP, port=BackendRestServer.PORT, debug=True)
