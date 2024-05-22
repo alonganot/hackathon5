@@ -1,11 +1,15 @@
-from typing import Optional
+from json import load
+from pathlib import Path
 from http import HTTPStatus
 from logging import getLogger
+from typing import Optional, Union
+from bcrypt import gensalt, hashpw
 from bson import json_util, ObjectId
 
 from flask_cors import CORS
 from pymongo.errors import PyMongoError
 from flask import Flask, jsonify, request, Response
+from jwt import encode as jwt_encode, decode as jwt_decode, InvalidTokenError, ExpiredSignatureError
 
 from mongo_manager import MongoDBContextManager
 
@@ -17,10 +21,19 @@ class BackendRestServer:
     PORT = 1360
     CORS_ORIGINS = '*'
 
+    JWT_ALGORITHM = 'HS256'
+
     DATA_INDEX = 0
     STATUS_INDEX = 1
 
     def __init__(self) -> None:
+        current_dir: Path = Path(__file__).parent
+        with open(current_dir.joinpath('config.json')) as config_file:
+            config = load(config_file)
+
+        self.pepper = config['PEPPER']
+        self.jwt_secret = config['JWT_SECRET']
+
         self.app: Flask = Flask(__name__)
         self.setup_routes()
 
@@ -62,8 +75,49 @@ class BackendRestServer:
         object_id: ObjectId = json_util.loads(serialized_object_id)
         return {'_id': object_id}
 
+    def verify_jwt(self, encoded_jwt) -> Union[Exception, bool]:
+        try:
+            # Decode and verify the JWT
+            jwt_decode(encoded_jwt, self.secret_key, algorithms=[BackendRestServer.JWT_ALGORITHM])
+            return True
+        except ExpiredSignatureError as exception:
+            server_log.error('JWT has expired')
+            return exception
+        except InvalidTokenError as exception:
+            server_log.error('Invalid JWT')
+            return exception
+
+    def create_password(self, password) -> tuple[str, str]:
+        salt = gensalt()
+        combined_string = self.pepper + password
+        
+        hashed_password = hashpw(combined_string.encode('utf-8'), salt)
+
+        return hashed_password, salt
+
+    def verify_password(self, password, stored_hash, salt) -> bool:
+        combined_string = self.pepper + password
+        hashed_password = hashpw(combined_string.encode('utf-8'), salt)
+
+        return hashed_password == stored_hash
+
+    def authentication_check(self, username, password) -> bool:
+        with MongoDBContextManager('users') as mongo:
+            user_filter: dict[str, str] = {'username': username}
+            user_data = list(mongo.collection.find_one(user_filter)).pop()
+
+        if self.verify_password(password, user_data['Hash'], user_data['Salt']):
+            payload = {'user_id': user_data['_id'], 'username': username}
+            encoded_jwt = jwt_encode(payload, self.jwt_secret, algorithm='HS256')
+            
+            return encoded_jwt
+
     def get_all_applicants(self,
                            applicant_area: Optional[str] = None) -> tuple[Response, HTTPStatus]:
+        jwt_valid = self.verify_jwt(request.headers['token'])
+        if not isinstance(jwt_valid, bool):
+            return jsonify({'Exception': jwt_valid}), HTTPStatus.FORBIDDEN
+
         with MongoDBContextManager('requests') as mongo:
             area_filter = self.create_area_filter(applicant_area)
             requests_data = list(mongo.collection.find(area_filter))
@@ -79,6 +133,10 @@ class BackendRestServer:
     def get_applicants(self,
                        applicant_type: str,
                        applicant_area: Optional[str] = None) -> tuple[Response, HTTPStatus]:
+        jwt_valid = self.verify_jwt(request.headers['token'])
+        if not isinstance(jwt_valid, bool):
+            return jsonify({'Exception': jwt_valid}), HTTPStatus.FORBIDDEN
+
         with MongoDBContextManager(applicant_type) as mongo:
             data_list = {'data_list': list(mongo.collection.find(self.create_area_filter(applicant_area)))}
 
@@ -101,6 +159,10 @@ class BackendRestServer:
     def update_applicant(self,
                          applicant_type: str,
                          serialized_object_id: str) -> tuple[Response, HTTPStatus]:
+        jwt_valid = self.verify_jwt(request.headers['token'])
+        if not isinstance(jwt_valid, bool):
+            return jsonify({'Exception': jwt_valid}), HTTPStatus.FORBIDDEN
+
         with MongoDBContextManager(applicant_type) as mongo:
             try:
                 mongo.collection.find_one_and_replace(self.create_object_filter(serialized_object_id), request.json)
@@ -113,6 +175,10 @@ class BackendRestServer:
     def delete_applicant(self,
                          applicant_type: str,
                          object_id: str) -> tuple[Response, HTTPStatus]:
+        jwt_valid = self.verify_jwt(request.headers['token'])
+        if not isinstance(jwt_valid, bool):
+            return jsonify({'Exception': jwt_valid}), HTTPStatus.FORBIDDEN
+
         with MongoDBContextManager(applicant_type) as mongo:
             try:
                 mongo.collection.delete_one(self.create_object_filter(object_id))
@@ -125,6 +191,10 @@ class BackendRestServer:
     def patch_applicant(self,
                         applicant_type: str,
                         serialized_object_id: str) -> tuple[Response, HTTPStatus]:
+        jwt_valid = self.verify_jwt(request.headers['token'])
+        if not isinstance(jwt_valid, bool):
+            return jsonify({'Exception': jwt_valid}), HTTPStatus.FORBIDDEN
+
         with MongoDBContextManager(applicant_type) as mongo:
             try:
                 mongo.collection.find_one_and_update(self.create_object_filter(serialized_object_id), request.json)
