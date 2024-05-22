@@ -1,7 +1,9 @@
-import { useEffect, useState } from "react"
+import { ChangeEvent, useEffect, useState } from "react"
 import Navbar from "../components/Navbar"
 import { FormAnswer } from "../types/FormAnswer"
 import { areas } from "./FormPage"
+import { api } from "../api"
+import '../styles/AdminPage.css'
 
 function AdminPage() {
 
@@ -23,7 +25,7 @@ function AdminPage() {
         onChange={(e)=>setPassword(e.target.value)}/>
       </form>}
 
-      {attemptedPass && <Lists password={password}/>}
+      {<Lists password={password}/>}
     </>
   )
 }
@@ -33,15 +35,24 @@ function Lists({password}: {password: string}){
   const [requestEntries, setRequestEntries] = useState<FormAnswer[]>([])
   const [regionalFilter, setRegionalFilter]= useState<string[]>([])
   useEffect(()=>{
-    //send request to api file
-    fetch('backend/admin/password')
-    .then(res=>{return res.json()
-
-    })
-    .then(data=>{setOfferEntries(data)})
+    const fetchData = async ()=>{
+    let entries = await api().all().getAll()
+    console.log(entries)
+    setOfferEntries(entries.offers)
+    setRequestEntries(entries.requests)
+    }
+    fetchData()    
   },[])
-  if (offerEntries[0].description === 'wrong password')
-    return(<div>wrong password</div>)
+
+  const handleChange = (e : ChangeEvent<HTMLInputElement>)=>{
+    const {name, value, checked} = e.target
+    if (value && !regionalFilter.includes(value))
+      setRegionalFilter([...regionalFilter, value])
+    else setRegionalFilter(regionalFilter.filter(area=>area!==value))
+  }
+
+  // if (offerEntries[0].description === 'wrong password')
+  //   return(<div>wrong password</div>)
 
   return (
     <>
@@ -51,14 +62,15 @@ function Lists({password}: {password: string}){
           <div id="areas">
               {areas.map((area, index) => (
                   <div key={index} style={{ width: "33%" }}>
-                      <input type="checkbox" id={area.value} name="area" value={area.value} onChange={handleChange} />
+                      <input type="checkbox" id={area.value} name="area" value={area.value}
+                      onChange={handleChange}  />
                       <label htmlFor={area.value}>{area.name}</label><br />
                   </div>
               ))}
           </div>
       </div>
 
-
+      <div className="lists-container">
       <h2>offer List</h2>
       <ul>
        { offerEntries.filter(offer=> !regionalFilter  || offer.area.some(relevantRegion =>  regionalFilter.includes(relevantRegion)))
@@ -74,6 +86,7 @@ function Lists({password}: {password: string}){
           <li key = {index}>{item.email}</li>
         ))}
       </ul>
+      </div>
     </>
   )
 }
