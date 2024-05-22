@@ -61,7 +61,7 @@ class BackendRestServer:
         
     def get_all_applicants(self,
                            applicant_area: Optional[str] = None) -> tuple[tuple[dict[str, Any], dict[str, Any]], HTTPStatus]:
-        with MongoDBContextManager('resuests') as mongo:
+        with MongoDBContextManager('requests') as mongo:
             area_filter = self.create_area_filter(applicant_area)
             requests_data = list(mongo.collection.find(area_filter))
 
