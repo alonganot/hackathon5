@@ -18,7 +18,7 @@ function App() {
       errorElement: <NotFoundPage />
     },
     {
-      path: "/form",
+      path: "/form/:purpose",
       element: <FormPage />,
       errorElement: <NotFoundPage />
     },
@@ -45,7 +45,7 @@ function App() {
   ]);
 
   return (
-    <div>
+    <div style={{direction: 'rtl'}}>
       <RouterProvider router={router} />
      </div>
   )
