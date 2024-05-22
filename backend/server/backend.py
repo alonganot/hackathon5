@@ -1,9 +1,9 @@
 from json import load
 from pathlib import Path
 from http import HTTPStatus
-from logging import getLogger
 from typing import Optional, Union
 from bcrypt import gensalt, hashpw
+from logging import getLogger, INFO
 from bson import json_util, ObjectId
 
 from flask_cors import CORS
@@ -31,8 +31,10 @@ class BackendRestServer:
         with open(current_dir.joinpath('config.json')) as config_file:
             config = load(config_file)
 
+        self.salt = gensalt()
         self.pepper = config['PEPPER']
         self.jwt_secret = config['JWT_SECRET']
+        self.admin_password = config['ADMIN_PASSWORD']
 
         self.app: Flask = Flask(__name__)
         self.setup_routes()
@@ -53,6 +55,9 @@ class BackendRestServer:
         self.app.add_url_rule('/applicants/<string:applicant_type>',
                               view_func=self.add_applicant,
                               methods=['POST'])
+        self.app.add_url_rule('/authenticate',
+                              view_func=self.authentication_check,
+                              methods=['GET'])
         self.app.add_url_rule('/applicants/<string:applicant_type>/<string:object_id>',
                               view_func=self.update_applicant,
                               methods=['PUT'])
@@ -75,42 +80,40 @@ class BackendRestServer:
         object_id: ObjectId = json_util.loads(serialized_object_id)
         return {'_id': object_id}
 
-    def verify_jwt(self, encoded_jwt) -> Union[Exception, bool]:
+    def verify_jwt(self, encoded_jwt: str) -> Union[Exception, bool]:
         try:
             # Decode and verify the JWT
-            jwt_decode(encoded_jwt, self.secret_key, algorithms=[BackendRestServer.JWT_ALGORITHM])
+            jwt_decode(encoded_jwt, self.jwt_secret, algorithms=[BackendRestServer.JWT_ALGORITHM])
             return True
         except ExpiredSignatureError as exception:
-            server_log.error('JWT has expired')
+            server_log.exception('JWT has expired', exception)
             return exception
         except InvalidTokenError as exception:
-            server_log.error('Invalid JWT')
+            server_log.exception('Invalid JWT', exception)
             return exception
 
-    def create_password(self, password) -> tuple[str, str]:
-        salt = gensalt()
+    def create_password_hash(self, password: str) -> tuple[str, str]:
         combined_string = self.pepper + password
         
-        hashed_password = hashpw(combined_string.encode('utf-8'), salt)
+        hashed_password = hashpw(combined_string.encode('utf-8'), self.salt)
 
-        return hashed_password, salt
+        return hashed_password
 
-    def verify_password(self, password, stored_hash, salt) -> bool:
+    def verify_password(self, password: str, stored_hash: str) -> bool:
         combined_string = self.pepper + password
-        hashed_password = hashpw(combined_string.encode('utf-8'), salt)
+        hashed_password = hashpw(combined_string.encode('utf-8'), self.salt)
 
         return hashed_password == stored_hash
 
-    def authentication_check(self, username, password) -> bool:
-        with MongoDBContextManager('users') as mongo:
-            user_filter: dict[str, str] = {'username': username}
-            user_data = list(mongo.collection.find_one(user_filter)).pop()
-
-        if self.verify_password(password, user_data['Hash'], user_data['Salt']):
-            payload = {'user_id': user_data['_id'], 'username': username}
+    def authentication_check(self) -> tuple[Response, HTTPStatus]:
+        if self.verify_password(request.json['password'],
+                                self.create_password_hash(self.admin_password)):
+            payload = {'user': 'admin'}
             encoded_jwt = jwt_encode(payload, self.jwt_secret, algorithm='HS256')
             
-            return encoded_jwt
+            return jsonify({'token': encoded_jwt}), HTTPStatus.OK
+
+        return jsonify({'Exception': 'Incorrect password'}), HTTPStatus.FORBIDDEN
 
     def get_all_applicants(self,
                            applicant_area: Optional[str] = None) -> tuple[Response, HTTPStatus]:
@@ -133,7 +136,7 @@ class BackendRestServer:
     def get_applicants(self,
                        applicant_type: str,
                        applicant_area: Optional[str] = None) -> tuple[Response, HTTPStatus]:
-        jwt_valid = self.verify_jwt(request.headers['token'])
+        jwt_valid = self.verify_jwt(request.headers['Token'])
         if not isinstance(jwt_valid, bool):
             return jsonify({'Exception': jwt_valid}), HTTPStatus.FORBIDDEN
 
