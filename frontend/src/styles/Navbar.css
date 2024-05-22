@@ -1,3 +1,22 @@
 #navbar {
-    background-color: green;
+    direction: rtl;
+    position: fixed;
+    top: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 5%;
+    width: 100%;
+    background-color: rgb(76, 237, 76);
+    margin-bottom: 5vh;
+}
+
+#route-link {
+    color: black;
+    margin-left: 2vw;
+    margin-right: 2vw;
+}
+
+#route-link:hover {
+    background-color: red !important;
 }

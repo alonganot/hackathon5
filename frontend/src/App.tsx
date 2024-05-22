@@ -2,11 +2,13 @@ import {
   createBrowserRouter,
   RouterProvider,
 } from "react-router-dom";
-import './App.css'
 import HomePage from "./pages/HomePage.tsx";
 import NotFoundPage from "./pages/NotFoundPage.tsx";
 import FormPage from "./pages/FormPage.tsx";
 import AdminPage from "./pages/AdminPage.tsx";
+import EventsPage from "./pages/EventsPage.tsx";
+import TeamPage from "./pages/TeamPage.tsx";
+import GalleryPage from "./pages/GalleryPage.tsx";
 
 function App() {
   const router = createBrowserRouter([
@@ -16,7 +18,7 @@ function App() {
       errorElement: <NotFoundPage />
     },
     {
-      path: "/form",
+      path: "/form/:purpose",
       element: <FormPage />,
       errorElement: <NotFoundPage />
     },
@@ -25,10 +27,25 @@ function App() {
       element: <AdminPage />,
       errorElement: <AdminPage />
     },
+    {
+      path: "/events",
+      element: <EventsPage />,
+      errorElement: <NotFoundPage />
+    },
+    {
+      path: "/team",
+      element: <TeamPage />,
+      errorElement: <NotFoundPage />
+    },
+    {
+      path: "/gallery",
+      element: <GalleryPage />,
+      errorElement: <AdminPage />
+    },
   ]);
 
   return (
-    <div>
+    <div style={{direction: 'rtl'}}>
       <RouterProvider router={router} />
      </div>
   )
