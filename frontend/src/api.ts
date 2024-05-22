@@ -47,9 +47,9 @@ export const api = () => {
         },
         all() {
             return {
-                async getAll(): Promise<{ requests: FormAnswer[], offers: FormAnswer[] }> {
+                async getAll(password): Promise<{ requests: FormAnswer[], offers: FormAnswer[] }> {
                     try {
-                        const res = await axios.get(`${import.meta.env.VITE_SERVER_URL}/applicants/all`)
+                        const res = await axios.get(`${import.meta.env.VITE_SERVER_URL}/applicants/all/${password}`)
                         return res?.data
                     } catch (error) {
                         console.log(error)

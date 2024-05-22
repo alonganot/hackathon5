@@ -11,7 +11,7 @@ function AdminPage() {
   const [password, setPassword] = useState("")
   const handleSubmit = (event)=>{
     event.preventDefault()
-
+    setAttemptedPass(true)
     // move to home page as 
   }
   return (
@@ -25,7 +25,7 @@ function AdminPage() {
         onChange={(e)=>setPassword(e.target.value)}/>
       </form>}
 
-      {<Lists password={password}/>}
+      {attemptedPass && <Lists password={password}/>}
     </>
   )
 }
@@ -35,8 +35,9 @@ function Lists({password}: {password: string}){
   const [requestEntries, setRequestEntries] = useState<FormAnswer[]>([])
   const [regionalFilter, setRegionalFilter]= useState<string[]>([])
   useEffect(()=>{
+    console.log(password)
     const fetchData = async ()=>{
-    let entries = await api().all().getAll()
+    let entries = await api().all().getAll(password)
     console.log(entries)
     setOfferEntries(entries.offers)
     setRequestEntries(entries.requests)
