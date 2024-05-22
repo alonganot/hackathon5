@@ -15,6 +15,9 @@ class BackendRestServer:
     IP = 'localhost'
     PORT = 1360
 
+    DATA_INDEX = 0
+    STATUS_INDEX = 1
+
     def __init__(self) -> None:
         self.app: Flask = Flask(__name__)
         self.setup_routes()
@@ -41,24 +44,19 @@ class BackendRestServer:
         self.app.add_url_rule('/applicants/<string:applicant_type>/<string:object_id>',
                               view_func=self.patch_applicant,
                               methods=['PATCH'])
-        self.app.add_url_rule('/applicants/all/metadata',
-                              view_func=self.get_all_metadata,
-                              methods=['HEAD'])
-        self.app.add_url_rule('/applicants/<string:applicant_type>/metadata',
-                              view_func=self.get_metadata,
-                              methods=['HEAD'])
-        self.app.add_url_rule('/applicants/<string:applicant_type>/<string:applicant_area>/metadata',
-                              view_func=self.get_metadata,
-                              methods=['HEAD'])
 
     @staticmethod
     def create_area_filter(applicant_area: str) -> Optional[dict[str: str]]:
-        area_filter: Optional[dict[str: str]] = None
         if applicant_area:
-            area_filter = {'area': applicant_area}
+            return {'area': applicant_area}
 
-        return area_filter
+        return None
         
+    @staticmethod
+    def create_object_filter(serialized_object_id: str) -> dict[str: ObjectId]:
+        object_id: ObjectId = json_util.loads(serialized_object_id)
+        return {'_id': object_id}
+
     def get_all_applicants(self,
                            applicant_area: Optional[str] = None) -> tuple[tuple[dict[str, Any], dict[str, Any]], HTTPStatus]:
         with MongoDBContextManager('requests') as mongo:
@@ -70,7 +68,7 @@ class BackendRestServer:
 
             all_data = ({'requests_data_list': requests_data}, {'offers_data_list': offers_data})
             
-            return all_data, HTTPStatus.OK
+        return all_data, HTTPStatus.OK
 
     def get_applicants(self,
                        applicant_type: str,
@@ -92,34 +90,37 @@ class BackendRestServer:
                 server_log.exception(exception)
                 return jsonify({'Exception': exception}), HTTPStatus.BAD_REQUEST
             
-            return jsonify({'Exception': f'{'Created successfuly'}'}), HTTPStatus.CREATED
+        return jsonify({'Exception': f'{'Created successfuly'}'}), HTTPStatus.CREATED
 
-    def update_applicant(self, book_id):
-        raise NotImplementedError
+    def update_applicant(self, applicant_type: str, serialized_object_id: str):
+        with MongoDBContextManager(applicant_type) as mongo:
+            try:
+                mongo.collection.find_one_and_replace(self.create_object_filter(serialized_object_id), request.json)
+            except PyMongoError as exception:
+                server_log.exception(exception)
+                return jsonify({'Exception': exception}), HTTPStatus.BAD_REQUEST
 
-        return jsonify({'Exception': f'{KeyError('Applicant not found')}'}), HTTPStatus.NOT_FOUND
+        return jsonify({'Exception': f'{'Updated successfuly'}'}), HTTPStatus.OK
 
-    def delete_applicant(self, book_id):
-        raise NotImplementedError
-        if True:
-            return jsonify({'message': 'Book deleted successfully'}), HTTPStatus.OK
-        else:
-            return jsonify({'error': 'Book not found'}), HTTPStatus.NOT_FOUND
+    def delete_applicant(self, applicant_type: str, object_id: str):
+        with MongoDBContextManager(applicant_type) as mongo:
+            try:
+                mongo.collection.delete_one(self.create_object_filter(object_id))
+            except PyMongoError as exception:
+                server_log.exception(exception)
+                return jsonify({'Exception': exception}), HTTPStatus.BAD_REQUEST
 
-    def patch_applicant(self, book_id):
-        raise NotImplementedError
-        if True:
-            return jsonify(book), HTTPStatus.OK
-        else:
-            return jsonify({'error': 'Book not found'}), HTTPStatus.NOT_FOUND
+        return jsonify({'Exception': f'{'Deleted successfuly'}'}), HTTPStatus.OK
 
-    def get_all_metadata(self) -> tuple[tuple[dict[str, Any], dict[str, Any]], HTTPStatus]:
-        raise NotImplementedError
+    def patch_applicant(self, applicant_type: str, serialized_object_id: str):
+        with MongoDBContextManager(applicant_type) as mongo:
+            try:
+                mongo.collection.find_one_and_update(self.create_object_filter(serialized_object_id), request.json)
+            except PyMongoError as exception:
+                server_log.exception(exception)
+                return jsonify({'Exception': exception}), HTTPStatus.BAD_REQUEST
 
-    def get_metadata(self,
-                     applicant_type: str,
-                     applicant_area: Optional[str] = None) -> tuple[dict[str, Any], HTTPStatus]:
-        raise NotImplementedError
+        return jsonify({'Exception': f'{'Updated successfuly'}'}), HTTPStatus.OK
 
     def run(self) -> None:
         self.app.run(host=BackendRestServer.IP, port=BackendRestServer.PORT, debug=True)
