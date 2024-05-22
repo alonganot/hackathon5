@@ -3,6 +3,7 @@ from logging import getLogger
 from typing import Any, Optional
 from bson import json_util, ObjectId
 
+from flask_cors import CORS
 from pymongo.errors import PyMongoError
 from flask import Flask, jsonify, request
 
@@ -14,6 +15,7 @@ server_log = getLogger(__name__)
 class BackendRestServer:
     IP = 'localhost'
     PORT = 1360
+    CORS_ORIGINS = '*'
 
     DATA_INDEX = 0
     STATUS_INDEX = 1
@@ -21,6 +23,9 @@ class BackendRestServer:
     def __init__(self) -> None:
         self.app: Flask = Flask(__name__)
         self.setup_routes()
+
+        self.cors_app = CORS(self.app, origins=BackendRestServer.CORS_ORIGINS)
+        self.cors_app.init_app(self.app)
 
     def setup_routes(self):
         self.app.add_url_rule('/applicants/all',
