@@ -54,8 +54,12 @@ function FormPage() {
     };
 
     const submitForm = () => {
-        const answerWithType = {...formAnswer, type: purpose}
-        console.log(answerWithType);
+        if (purpose === "offer") {
+            //POST backend/offer
+        } else {
+            //POST backend/request
+        }
+        console.log(formAnswer);
     }
 
     return (
