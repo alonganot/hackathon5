@@ -21,7 +21,7 @@ function TeamPage() {
             <div className="outer">
             {teamMembers.map((member, index) => (
                 <div className="person" key={index}>
-                    <img src={member.url} />
+                    <img className="img_p" src={member.url} />
                     <h4>{member.name}</h4>
                     <h5>{member.description}</h5>
                 </div>
