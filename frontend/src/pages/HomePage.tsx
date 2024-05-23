@@ -12,7 +12,7 @@ function HomePage() {
                     <div className="brown" style={{transform:"translate(28px,-28px)"}} ></div>
                     <div className="brown" style={{transform:"translate(-28px,28px)" , left:"0px",bottom:"0px"}}></div>
                     <div style={{justifyContent:"center",borderRadius:"20px",overflow:"hidden", justifySelf:"center", height:"inherit"}}>
-                        <video style={{height:"inherit",position:"relative"}} controls>
+                        <video id="main-video" poster="/video-blur.png" controls>
                             <source src="/hamal-video.mp4" type="video/mp4"/>
                         </video>
                     </div>
@@ -27,7 +27,9 @@ function HomePage() {
                 <Link id="route-link-request" className="button" to={"/form/request"}>לבקשת עזרה</Link>
             </div>
 
-
+            <div id="ops">
+                הפעילויות שלנו
+            </div>
 
             <div style={{position: "relative"}}>
                 <img style={{justifySelf:"center", height:"1500px",position: "relative",top: "-30px", marginRight: "200px"}} src="/israel-color-map.svg"/>
@@ -77,6 +79,14 @@ function HomePage() {
             <div style={{height:"0px", width:"100%",backgroundColor: "black",position: "absolute",bottom:"0"}}>
 
             </div>
+ 
+            {/* <div id="footer" style={{height: "300px",width: "66vw",backgroundColor:"#000000"}}>
+                <div>
+                    <a href="https://instagram.com/michaelmilis?igshid=YTQwZjQ0NmI0OA==">  </a>
+                    <img></img>
+                    <img></img>
+                </div>
+            </div> */}
  
         </>
     )

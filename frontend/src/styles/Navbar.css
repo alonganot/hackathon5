@@ -1,14 +1,14 @@
 #navbar {
     direction: rtl;
     position: fixed;
-    top: 0;
     display: flex;
-    align-items: center;
+    align-items: top;
     justify-content: center;
-    height: 40px;
+    height: 60px;
     width: 100%;
+    top: 0px;
     z-index: 9;
-    background-image: linear-gradient(#e9ddbf, #e9ddbf00);
+    background-image: linear-gradient(#e9ddbf, #fff6e500);
     /* margin-bottom: 5vh; */
 }
 
@@ -17,7 +17,17 @@
     src: url(fonts/Heebo-VariableFont_wght.ttf);
 }
 
+#logo{
+    height: 32px;
+    width: 32px;
+    position: absolute;
+    right: 20px;
+    top: 4px;
+}
+
 #route-link {
+    top: 8px;
+    position: relative;
     color: #3c3c3c;
     font-family: Heebo;
     /* margin-left: 8vw; */
