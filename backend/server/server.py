@@ -26,12 +26,10 @@ class BackendRestServer:
     STATUS_INDEX = 1
 
     def __init__(self) -> None:
-        config = GetSecrets().decoded_data
-
         self.salt = gensalt()
-        self.pepper = config['pepper']
-        self.jwt_secret = config['jwt_secret']
-        self.admin_password = config['admin_password']
+        self.pepper = GetSecrets('pepper').decoded_data
+        self.jwt_secret = GetSecrets('jwt_secret').decoded_data
+        self.admin_password = GetSecrets('admin_password').decoded_data
 
         self.app: Flask = Flask(__name__)
         self.setup_routes()

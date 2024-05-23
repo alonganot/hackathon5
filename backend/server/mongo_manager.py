@@ -14,11 +14,9 @@ mongo_log = getLogger(__name__)
 
 class MongoDBContextManager:
     def __init__(self, applicant_type: str) -> None:
-        config = GetSecrets().decoded_data
-
-        self.host: str = config['mongo_uri']
-        self.port: int = config['mongo_port']
-        self.db_name: str = config['mongo_db_name']
+        self.host: str = GetSecrets('mongo_uri').decoded_data
+        self.port: int = GetSecrets('mongo_port').decoded_data
+        self.db_name: str = GetSecrets('mongo_db_name').decoded_data
         self.collection_name: str = applicant_type
         self.client: Optional[MongoClient] = None
         self.db: Optional[Database] = None
