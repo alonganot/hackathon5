@@ -1,6 +1,6 @@
 from json import load
 from pathlib import Path
-from kubernetes import client
+from kubernetes import client, config
 
 
 class GetSecrets:
