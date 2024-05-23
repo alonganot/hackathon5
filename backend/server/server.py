@@ -9,8 +9,8 @@ from pymongo.errors import PyMongoError
 from flask import Flask, jsonify, request, Response
 from jwt import encode as jwt_encode, decode as jwt_decode, InvalidTokenError, ExpiredSignatureError
 
-from get_secrets import GetSecrets
-from mongo_manager import MongoDBContextManager
+from server.get_secrets import GetSecrets
+from server.mongo_manager import MongoDBContextManager
 
 server_log = getLogger(__name__)
 
@@ -26,12 +26,10 @@ class BackendRestServer:
     STATUS_INDEX = 1
 
     def __init__(self) -> None:
-        config = GetSecrets().decoded_data
-
         self.salt = gensalt()
-        self.pepper = config['pepper']
-        self.jwt_secret = config['jwt_secret']
-        self.admin_password = config['admin_password']
+        self.pepper = GetSecrets('pepper').decoded_data
+        self.jwt_secret = GetSecrets('jwt_secret').decoded_data
+        self.admin_password = GetSecrets('admin_password').decoded_data
 
         self.app: Flask = Flask(__name__)
         self.setup_routes()
