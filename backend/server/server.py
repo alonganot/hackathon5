@@ -206,11 +206,3 @@ class BackendRestServer:
 
     def run(self) -> None:
         self.app.run(host=BackendRestServer.IP, port=BackendRestServer.PORT, debug=True)
-
-
-def main() -> None:
-    BackendRestServer().run()
-
-
-if __name__ == '__main__':
-    main()
