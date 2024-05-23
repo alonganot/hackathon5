@@ -71,7 +71,7 @@ function FormPage() {
         <>
             <div className="background">
                 <Link id="route-link-back" to={"/"}>
-                    <img src="..\src\assets\back-button.svg" className="back"></img>
+                    <img src="..\..\..\back-button.svg" className="back"></img>
                 </Link>
                 <div className="form">
 
