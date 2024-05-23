@@ -22,7 +22,10 @@ class BackendRestServer:
     LOCAL_HOST = 'localhost'
     IP = gethostbyname(gethostname())
     PORT = 8000
-    CORS_ORIGINS = '*'  # [LOCAL_HOST, IP, '172.30.107.20']
+    CORS_ORIGINS = [f'http://{LOCAL_HOST}:{PORT}',
+                    f'http://172.30.107.20:{PORT}',
+                    f'http://{IP}:{PORT}',
+                    '*']
 
     JWT_ALGORITHM = 'HS256'
 
