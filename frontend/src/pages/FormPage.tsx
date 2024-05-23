@@ -68,23 +68,29 @@ function FormPage() {
 
     return (
         <>
-            <Navbar />
-            <div className="form">
-                <label htmlFor="email">אימייל</label>
-                <input className="text" name="email" onChange={handleChange} /> <br />
-                <label htmlFor="fullname">שם מלא</label>
-                <input className="text" name="fullname" onChange={handleChange} /> <br />
-                <label htmlFor="phone">פלאפון ליצירת קשר</label>
-                <input className="text" name="phone" onChange={handleChange} />
-                <div>
-                    <p>איזור בארץ</p>
-                    <div id="areas">
-                        {areas.map((area, index) => (
-                            <div key={index} style={{ width: "33%" }}>
-                                <input type="checkbox" id={area.value} name="area" value={area.value} onChange={handleChange} />
-                                <label htmlFor={area.value}>{area.name}</label><br />
-                            </div>
-                        ))}
+        
+            <div className="background">
+                <div className="form">
+
+                    <div className="settings">
+                        <label htmlFor="email">אימייל</label>
+                        <input className="text" name="email" onChange={handleChange} />
+                        <label htmlFor="fullname">שם מלא</label>
+                        <input className="text" name="fullname" onChange={handleChange} />
+                        <label htmlFor="phone">מספר טלפון</label>
+                        <input className="text" name="phone" onChange={handleChange} />
+                    </div>
+
+                    <div>
+                        <p>איזור בארץ</p>
+                        <div id="areas">
+                            {areas.map((area, index) => (
+                                <div key={index} style={{ width: "33%" }}>
+                                    <input type="checkbox" id={area.value} name="area" value={area.value} onChange={handleChange} />
+                                    <label htmlFor={area.value}>{area.name}</label><br />
+                                </div>
+                            ))}
+                        </div>
                     </div>
                 </div>
                 {
@@ -100,7 +106,7 @@ function FormPage() {
                         </div>
                         {
                             formAnswer.goal === 'organize' &&
-                            <div>
+                            <div className="settings">
                                 <label htmlFor="description">איזה פעילות תוכל/י להעביר? ספר/י בקצרה</label><br />
                                 <input className="text" name="description" onChange={handleChange} /> <br />
                                 <label htmlFor="audience">מה קהל היעד של הפעילות שלך?</label><br />
@@ -118,20 +124,25 @@ function FormPage() {
                 }
                 {
                     purpose == "request" && <div className="form">
-                        <label htmlFor="city">יישוב</label>
-                        <input className="text" name="city" onChange={handleChange} /> <br />
-                        <label htmlFor="familystatus">מצב משפחתי (רווק/פלוס/וכד)</label>
-                        <input className="text" name="familystatus" onChange={handleChange} /> <br />
-                        <label htmlFor="childrenage">גילאי הילדים</label>
-                        <input className="text" name="childrenage" onChange={handleChange} /> <br />
-                        <label htmlFor="hotel">באיזה מלון אתם?</label>
-                        <input className="text" name="hotel" onChange={handleChange} /> <br />
-                        <label htmlFor="comments">הערות נוספות/משהו חשוב שנדע...</label>
-                        <input className="text" name="comments" onChange={handleChange} /> <br />
+                        <div className="settings">
+                            <label htmlFor="city">יישוב</label>
+                            <input className="text" name="city" onChange={handleChange} />
+                            <label htmlFor="familystatus">מצב משפחתי (רווק/פלוס/וכד)</label>
+                            <input className="text" name="familystatus" onChange={handleChange} />
+                            <label htmlFor="childrenage">גילאי הילדים</label>
+                            <input className="text" name="childrenage" onChange={handleChange} />
+                            <label htmlFor="hotel">באיזה מלון אתם?</label>
+                            <input className="text" name="hotel" onChange={handleChange} />
+                            <label htmlFor="comments">הערות נוספות/משהו חשוב שנדע...</label>
+                            <input className="text" name="comments" onChange={handleChange} /> <br />
+                        </div>
                     </div>
                 }
-                <button className="text" onClick={submitForm}>שליחה</button>
+                <div>
+                    <button className="text submit" onClick={submitForm}>שליחה</button>
+                </div>
             </div>
+            {/* </div> */}
         </>
     )
 }
