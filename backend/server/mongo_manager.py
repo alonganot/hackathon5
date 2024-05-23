@@ -1,5 +1,3 @@
-from json import load
-from pathlib import Path
 from typing import Optional
 from logging import getLogger
 from pymongo import MongoClient
@@ -9,18 +7,18 @@ from pymongo.collection import Collection
 
 from typing_extensions import Self
 
+from backend.server.get_secrets import GetSecrets
+
 mongo_log = getLogger(__name__)
 
 
 class MongoDBContextManager:
     def __init__(self, applicant_type: str) -> None:
-        current_dir: Path = Path(__file__).parent
-        with open(current_dir.joinpath('config.json')) as config_file:
-            config = load(config_file)
+        config = GetSecrets().decoded_data
 
-        self.host: str = config['MONGO_URI']
-        self.port: int = config['MONGO_PORT']
-        self.db_name: str = config['MONGO_DB_NAME']
+        self.host: str = config['mongo_uri']
+        self.port: int = config['mongo_port']
+        self.db_name: str = config['mongo_db_name']
         self.collection_name: str = applicant_type
         self.client: Optional[MongoClient] = None
         self.db: Optional[Database] = None

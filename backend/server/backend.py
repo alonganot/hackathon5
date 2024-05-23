@@ -1,5 +1,3 @@
-from json import load
-from pathlib import Path
 from http import HTTPStatus
 from logging import getLogger
 from typing import Optional, Union
@@ -11,6 +9,7 @@ from pymongo.errors import PyMongoError
 from flask import Flask, jsonify, request, Response
 from jwt import encode as jwt_encode, decode as jwt_decode, InvalidTokenError, ExpiredSignatureError
 
+from get_secrets import GetSecrets
 from mongo_manager import MongoDBContextManager
 
 server_log = getLogger(__name__)
@@ -27,14 +26,12 @@ class BackendRestServer:
     STATUS_INDEX = 1
 
     def __init__(self) -> None:
-        current_dir: Path = Path(__file__).parent
-        with open(current_dir.joinpath('config.json')) as config_file:
-            config = load(config_file)
+        config = GetSecrets().decoded_data
 
         self.salt = gensalt()
-        self.pepper = config['PEPPER']
-        self.jwt_secret = config['JWT_SECRET']
-        self.admin_password = config['ADMIN_PASSWORD']
+        self.pepper = config['pepper']
+        self.jwt_secret = config['jwt_secret']
+        self.admin_password = config['admin_password']
 
         self.app: Flask = Flask(__name__)
         self.setup_routes()
