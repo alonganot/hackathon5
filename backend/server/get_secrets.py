@@ -1,6 +1,7 @@
 from json import load
 from pathlib import Path
 from kubernetes import client, config
+from kubernetes.config.config_exception import ConfigException
 
 
 class GetSecrets:
@@ -20,7 +21,7 @@ class GetSecrets:
             # Decode and access the secret data
             self.decoded_data = {key: value.decode('utf-8') for key, value in secret.data.items()}
 
-        except Exception:
+        except ConfigException:
             current_dir: Path = Path(__file__).parent
             with open(current_dir.joinpath('config.json')) as config_file:
                 self.decoded_data = load(config_file)
