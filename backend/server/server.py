@@ -1,5 +1,3 @@
-from json import load
-from pathlib import Path
 from http import HTTPStatus
 from logging import getLogger
 from typing import Optional, Union
@@ -11,7 +9,8 @@ from pymongo.errors import PyMongoError
 from flask import Flask, jsonify, request, Response
 from jwt import encode as jwt_encode, decode as jwt_decode, InvalidTokenError, ExpiredSignatureError
 
-from mongo_manager import MongoDBContextManager
+from server.get_secrets import GetSecrets
+from server.mongo_manager import MongoDBContextManager
 
 server_log = getLogger(__name__)
 
@@ -19,7 +18,7 @@ server_log = getLogger(__name__)
 class BackendRestServer:
     IP = 'localhost'
     PORT = 8000
-    CORS_ORIGINS = '*'
+    CORS_ORIGINS = ['localhost', '172.30.107.20']
 
     JWT_ALGORITHM = 'HS256'
 
@@ -27,14 +26,10 @@ class BackendRestServer:
     STATUS_INDEX = 1
 
     def __init__(self) -> None:
-        current_dir: Path = Path(__file__).parent
-        with open(current_dir.joinpath('config.json')) as config_file:
-            config = load(config_file)
-
         self.salt = gensalt()
-        self.pepper = config['PEPPER']
-        self.jwt_secret = config['JWT_SECRET']
-        self.admin_password = config['ADMIN_PASSWORD']
+        self.pepper = GetSecrets('pepper').decoded_data
+        self.jwt_secret = GetSecrets('jwt_secret').decoded_data
+        self.admin_password = GetSecrets('admin_password').decoded_data
 
         self.app: Flask = Flask(__name__)
         self.setup_routes()
@@ -211,11 +206,3 @@ class BackendRestServer:
 
     def run(self) -> None:
         self.app.run(host=BackendRestServer.IP, port=BackendRestServer.PORT, debug=True)
-
-
-def main() -> None:
-    BackendRestServer().run()
-
-
-if __name__ == '__main__':
-    main()

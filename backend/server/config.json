@@ -1,0 +1,8 @@
+{
+"mongo_uri": "mongodb+srv://alonga:password12321@alonga.zyoscl0.mongodb.net/",
+"mongo_port": 27017,
+"mongo_db_name": "hackathon",
+"pepper": "test_pep",
+"jwt_secret": "test_jwt",
+"admin_password": "Aa123456"
+}
