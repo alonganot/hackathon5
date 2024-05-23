@@ -21,4 +21,4 @@ COPY . /app/
 EXPOSE 8000
 
 # Command to run the application
-CMD ["uvicorn", "backend.py", "--host", "0.0.0.0", "--port", "8000"]
+CMD python backend.py
