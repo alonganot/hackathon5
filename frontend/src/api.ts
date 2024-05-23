@@ -48,7 +48,7 @@ export const api = () => {
         },
         all() {
             return {
-                async getAll(): Promise<{ requests: FormAnswer[], offers: FormAnswer[] }> {
+                async getAll(): Promise<string> {
                     try {
                         console.log(2222)
                         const res = await axios({
@@ -60,7 +60,7 @@ export const api = () => {
                         return res?.data
                     } catch (error) {
                         console.log(error)
-                        return { requests: [], offers: [] }
+                        return ""
                     }
                 },
             }

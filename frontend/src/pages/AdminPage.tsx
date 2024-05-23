@@ -4,13 +4,12 @@ import { FormAnswer } from "../types/FormAnswer"
 import { areas } from "./FormPage"
 import { api } from "../api"
 import '../styles/AdminPage.css'
-import { BSON } from "bson"
 
 function AdminPage() {
 
   const [attemptedPass, setAttemptedPass] = useState(false)
   const [password, setPassword] = useState("")
-  const handleSubmit = async (event: ChangeEvent<HTMLInputElement>)=>{
+  const handleSubmit = async (event: any) =>{
     event.preventDefault()
     let token = await api().auth().verify(password)
     localStorage.setItem("token", token)
@@ -37,18 +36,19 @@ function Lists(){
   const [offerEntries, setOfferEntries] = useState<FormAnswer[]>([])
   const [requestEntries, setRequestEntries] = useState<FormAnswer[]>([])
   const [regionalFilter, setRegionalFilter]= useState<string[]>([])
+  const [loading, setLoading]= useState<boolean>(true)
+
   useEffect(()=>{
-    const fetchData = async ()=>{
-    let codedEntries = await api().all().getAll()
-    let entries = (JSON.parse(codedEntries))
-    setOfferEntries(entries.offers)
-    setRequestEntries(entries.requests)
-    }
-    fetchData()    
+    api().all().getAll().then(codedEntries => {
+      let entries = (JSON.parse(codedEntries))
+      setOfferEntries(entries.offers)
+      setRequestEntries(entries.requests)
+      setLoading(false)
+    })
   },[])
 
   const handleChange = (e : ChangeEvent<HTMLInputElement>)=>{
-    const {name, value, checked} = e.target
+    const { value} = e.target
     if (value && !regionalFilter.includes(value))
       setRegionalFilter([...regionalFilter, value])
     else setRegionalFilter(regionalFilter.filter(area=>area!==value))
@@ -72,11 +72,11 @@ function Lists(){
               ))}
           </div>
       </div>
-
-      <div className="lists-container">
+{ !loading && 
+    <div className="lists-container">
       <h2>offer List</h2>
       <ul>
-       {offerEntries && offerEntries.filter(offer=> !regionalFilter  || offer.area.some(relevantRegion =>  regionalFilter.includes(relevantRegion)))
+       {offerEntries.length > 0 && offerEntries.filter((offer)=> regionalFilter.length === 0  || offer.area?.some(relevantRegion =>  regionalFilter.includes(relevantRegion)))
         .map((item, index)=>(
           <li key = {index}>{item.email}</li>
         ))}
@@ -84,12 +84,13 @@ function Lists(){
 
       <h2>Request List</h2>
       <ul>
-      {requestEntries && requestEntries.filter(request=> !regionalFilter || request.area.some(relevantRegion=>  regionalFilter.includes(relevantRegion)))
+      {requestEntries.length > 0 && requestEntries.filter(request=> regionalFilter.length === 0 || request.area?.some(relevantRegion=>  regionalFilter.includes(relevantRegion)))
       .map((item, index) => (
           <li key = {index}>{item.email}</li>
         ))}
       </ul>
       </div>
+}
     </>
   )
 }
