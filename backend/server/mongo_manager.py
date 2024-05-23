@@ -42,7 +42,7 @@ class MongoDBContextManager:
                  exc_value: Optional[BaseException], 
                  traceback: Optional[TracebackType]) -> None:
         if exc_type:
-            mongo_log.exception(f'Error Occured', (exc_type, exc_value, traceback))
+            mongo_log.exception(f'Error Occurred', (exc_type, exc_value, traceback))
 
         if self.client:
             self.client.close()

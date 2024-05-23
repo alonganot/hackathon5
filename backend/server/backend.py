@@ -1,11 +1,15 @@
+from json import load
+from pathlib import Path
 from http import HTTPStatus
 from logging import getLogger
-from typing import Any, Optional
+from typing import Optional, Union
+from bcrypt import gensalt, hashpw
 from bson import json_util, ObjectId
 
 from flask_cors import CORS
 from pymongo.errors import PyMongoError
-from flask import Flask, jsonify, request
+from flask import Flask, jsonify, request, Response
+from jwt import encode as jwt_encode, decode as jwt_decode, InvalidTokenError, ExpiredSignatureError
 
 from mongo_manager import MongoDBContextManager
 
@@ -17,10 +21,21 @@ class BackendRestServer:
     PORT = 1360
     CORS_ORIGINS = '*'
 
+    JWT_ALGORITHM = 'HS256'
+
     DATA_INDEX = 0
     STATUS_INDEX = 1
 
     def __init__(self) -> None:
+        current_dir: Path = Path(__file__).parent
+        with open(current_dir.joinpath('config.json')) as config_file:
+            config = load(config_file)
+
+        self.salt = gensalt()
+        self.pepper = config['PEPPER']
+        self.jwt_secret = config['JWT_SECRET']
+        self.admin_password = config['ADMIN_PASSWORD']
+
         self.app: Flask = Flask(__name__)
         self.setup_routes()
 
@@ -28,7 +43,7 @@ class BackendRestServer:
         self.cors_app.init_app(self.app)
 
     def setup_routes(self) -> None:
-        self.app.add_url_rule('/applicants/all',
+        self.app.add_url_rule('/applicants/all/<string:applicant_area>',
                               view_func=self.get_all_applicants,
                               methods=['GET'])
         self.app.add_url_rule('/applicants/<string:applicant_type>',
@@ -40,6 +55,9 @@ class BackendRestServer:
         self.app.add_url_rule('/applicants/<string:applicant_type>',
                               view_func=self.add_applicant,
                               methods=['POST'])
+        self.app.add_url_rule('/authenticate',
+                              view_func=self.authentication_check,
+                              methods=['GET'])
         self.app.add_url_rule('/applicants/<string:applicant_type>/<string:object_id>',
                               view_func=self.update_applicant,
                               methods=['PUT'])
@@ -62,8 +80,47 @@ class BackendRestServer:
         object_id: ObjectId = json_util.loads(serialized_object_id)
         return {'_id': object_id}
 
+    def verify_jwt(self, encoded_jwt: str) -> Union[Exception, bool]:
+        try:
+            # Decode and verify the JWT
+            jwt_decode(encoded_jwt, self.jwt_secret, algorithms=[BackendRestServer.JWT_ALGORITHM])
+            return True
+        except ExpiredSignatureError as exception:
+            server_log.exception('JWT has expired', exception)
+            return exception
+        except InvalidTokenError as exception:
+            server_log.exception('Invalid JWT', exception)
+            return exception
+
+    def create_password_hash(self, password: str) -> tuple[str, str]:
+        combined_string = self.pepper + password
+        
+        hashed_password = hashpw(combined_string.encode('utf-8'), self.salt)
+
+        return hashed_password
+
+    def verify_password(self, password: str, stored_hash: str) -> bool:
+        combined_string = self.pepper + password
+        hashed_password = hashpw(combined_string.encode('utf-8'), self.salt)
+
+        return hashed_password == stored_hash
+
+    def authentication_check(self) -> tuple[Response, HTTPStatus]:
+        if self.verify_password(request.json['password'],
+                                self.create_password_hash(self.admin_password)):
+            payload = {'user': 'admin'}
+            encoded_jwt = jwt_encode(payload, self.jwt_secret, algorithm='HS256')
+            
+            return jsonify({'token': encoded_jwt}), HTTPStatus.OK
+
+        return jsonify({'Exception': 'Incorrect password'}), HTTPStatus.FORBIDDEN
+
     def get_all_applicants(self,
-                           applicant_area: Optional[str] = None) -> tuple[tuple[dict[str, Any], dict[str, Any]], HTTPStatus]:
+                           applicant_area: Optional[str] = None) -> tuple[Response, HTTPStatus]:
+        jwt_valid = self.verify_jwt(request.headers['token'])
+        if not isinstance(jwt_valid, bool):
+            return jsonify({'Exception': jwt_valid}), HTTPStatus.FORBIDDEN
+
         with MongoDBContextManager('requests') as mongo:
             area_filter = self.create_area_filter(applicant_area)
             requests_data = list(mongo.collection.find(area_filter))
@@ -71,13 +128,18 @@ class BackendRestServer:
             mongo.set_collection('offers')
             offers_data = list(mongo.collection.find(area_filter))
 
-            all_data = ({'requests_data_list': requests_data}, {'offers_data_list': offers_data})
+            all_data = jsonify({'requests_data_list': requests_data,
+                                'offers_data_list': offers_data})
             
         return all_data, HTTPStatus.OK
 
     def get_applicants(self,
                        applicant_type: str,
-                       applicant_area: Optional[str] = None) -> tuple[dict[str, Any], HTTPStatus]:
+                       applicant_area: Optional[str] = None) -> tuple[Response, HTTPStatus]:
+        jwt_valid = self.verify_jwt(request.headers['Token'])
+        if not isinstance(jwt_valid, bool):
+            return jsonify({'Exception': jwt_valid}), HTTPStatus.FORBIDDEN
+
         with MongoDBContextManager(applicant_type) as mongo:
             data_list = {'data_list': list(mongo.collection.find(self.create_area_filter(applicant_area)))}
 
@@ -86,8 +148,8 @@ class BackendRestServer:
 
         return jsonify(json_util.dumps(data_list)), HTTPStatus.OK
 
-    def add_applicant(self,
-                      applicant_type: str) -> tuple[dict[str, Any], HTTPStatus]:
+    @staticmethod
+    def add_applicant(applicant_type: str) -> tuple[Response, HTTPStatus]:
         with MongoDBContextManager(applicant_type) as mongo:
             try:
                 mongo.collection.insert_one(request.json)
@@ -95,9 +157,15 @@ class BackendRestServer:
                 server_log.exception(exception)
                 return jsonify({'Exception': exception}), HTTPStatus.BAD_REQUEST
             
-        return jsonify({'Exception': f'{'Created successfuly'}'}), HTTPStatus.CREATED
+        return jsonify({'Exception': 'Created successfully'}), HTTPStatus.CREATED
 
-    def update_applicant(self, applicant_type: str, serialized_object_id: str):
+    def update_applicant(self,
+                         applicant_type: str,
+                         serialized_object_id: str) -> tuple[Response, HTTPStatus]:
+        jwt_valid = self.verify_jwt(request.headers['token'])
+        if not isinstance(jwt_valid, bool):
+            return jsonify({'Exception': jwt_valid}), HTTPStatus.FORBIDDEN
+
         with MongoDBContextManager(applicant_type) as mongo:
             try:
                 mongo.collection.find_one_and_replace(self.create_object_filter(serialized_object_id), request.json)
@@ -105,9 +173,15 @@ class BackendRestServer:
                 server_log.exception(exception)
                 return jsonify({'Exception': exception}), HTTPStatus.BAD_REQUEST
 
-        return jsonify({'Exception': f'{'Updated successfuly'}'}), HTTPStatus.OK
+        return jsonify({'Exception': 'Updated successfully'}), HTTPStatus.OK
 
-    def delete_applicant(self, applicant_type: str, object_id: str):
+    def delete_applicant(self,
+                         applicant_type: str,
+                         object_id: str) -> tuple[Response, HTTPStatus]:
+        jwt_valid = self.verify_jwt(request.headers['token'])
+        if not isinstance(jwt_valid, bool):
+            return jsonify({'Exception': jwt_valid}), HTTPStatus.FORBIDDEN
+
         with MongoDBContextManager(applicant_type) as mongo:
             try:
                 mongo.collection.delete_one(self.create_object_filter(object_id))
@@ -115,9 +189,15 @@ class BackendRestServer:
                 server_log.exception(exception)
                 return jsonify({'Exception': exception}), HTTPStatus.BAD_REQUEST
 
-        return jsonify({'Exception': f'{'Deleted successfuly'}'}), HTTPStatus.OK
+        return jsonify({'Exception': 'Deleted successfully'}), HTTPStatus.OK
 
-    def patch_applicant(self, applicant_type: str, serialized_object_id: str):
+    def patch_applicant(self,
+                        applicant_type: str,
+                        serialized_object_id: str) -> tuple[Response, HTTPStatus]:
+        jwt_valid = self.verify_jwt(request.headers['token'])
+        if not isinstance(jwt_valid, bool):
+            return jsonify({'Exception': jwt_valid}), HTTPStatus.FORBIDDEN
+
         with MongoDBContextManager(applicant_type) as mongo:
             try:
                 mongo.collection.find_one_and_update(self.create_object_filter(serialized_object_id), request.json)
@@ -125,7 +205,7 @@ class BackendRestServer:
                 server_log.exception(exception)
                 return jsonify({'Exception': exception}), HTTPStatus.BAD_REQUEST
 
-        return jsonify({'Exception': f'{'Updated successfuly'}'}), HTTPStatus.OK
+        return jsonify({'Exception': f'{'Updated successfully'}'}), HTTPStatus.OK
 
     def run(self) -> None:
         self.app.run(host=BackendRestServer.IP, port=BackendRestServer.PORT, debug=True)
