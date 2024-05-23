@@ -23,4 +23,4 @@ class GetSecrets:
         except Exception:
             current_dir: Path = Path(__file__).parent
             with open(current_dir.joinpath('config.json')) as config_file:
-                config = load(config_file)
+                self.decoded_data = load(config_file)
