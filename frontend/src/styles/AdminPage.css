@@ -1,0 +1,26 @@
+.lists-container { 
+    display: flex;
+    justify-content: space-around;
+    padding: 20px;
+}
+.list-container{
+    flex-direction: column;
+}
+
+.smalltext {
+    color: rgb(145, 145, 145);
+    font-size: 14px;
+    margin: 0;
+}
+
+.greentext {
+    color: rgb(49, 169, 44);
+    font-size: 14px;
+    margin: 0;
+}
+
+.redtext {
+    color: rgb(95, 20, 20);
+    font-size: 14px;
+    margin: 0;
+}

@@ -1,0 +1,9 @@
+{
+"mongo_uri": "mongodb+srv://alonga:password12321@alonga.zyoscl0.mongodb.net/",
+"new_mongo_uri": "mongodb://admin:password@172.30.8.67:27017/admin",
+"mongo_port": 27017,
+"mongo_db_name": "hackathon",
+"pepper": "Xst4{&<c(lPD<9{7zR7VjP~$t&r4y9@$~7{rC[t`KB..H99g#|",
+"jwt_secret": "K;6c|$/k{v%xpY!Pcw|el(O<6So7;-^r6[j22FOEfSQ%>'9Bq£",
+"admin_password": "help_sayeret_13337"
+}

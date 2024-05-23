@@ -2,7 +2,7 @@ import { Link } from "react-router-dom"
 import '../styles/Navbar.css'
 
 function Navbar() {
-    const routes = [{ name: "אירועים", route: "/events" }, { name: "מי אנחנו", route: "/team" }, { name: "גלריה", route: "/gallery" },{ name: "מנהל", route: "/admin" }]
+    const routes = [{ name: "התחברות כמנהל", route: "/admin" }, { name: "מי אנחנו", route: "/team" }]
     return (
         <div id="navbar">
             <Link to="/">

@@ -3,6 +3,7 @@ from logging import getLogger
 from typing import Optional, Union
 from bcrypt import gensalt, hashpw
 from bson import json_util, ObjectId
+from socket import gethostbyname, gethostname
 
 from flask_cors import CORS
 from pymongo.errors import PyMongoError
@@ -16,9 +17,15 @@ server_log = getLogger(__name__)
 
 
 class BackendRestServer:
-    IP = 'localhost'
-    PORT = 1360
-    CORS_ORIGINS = ['localhost', '172.30.107.20']
+    DEBUG = True
+
+    LOCAL_HOST = 'localhost'
+    IP = gethostbyname(gethostname())
+    PORT = 8000
+    CORS_ORIGINS = [f'http://{LOCAL_HOST}:{PORT}',
+                    f'http://172.30.107.20:{PORT}',
+                    f'http://{IP}:{PORT}',
+                    '*']
 
     JWT_ALGORITHM = 'HS256'
 
@@ -38,6 +45,9 @@ class BackendRestServer:
         self.cors_app.init_app(self.app)
 
     def setup_routes(self) -> None:
+        self.app.add_url_rule('/applicants/all',
+                              view_func=self.get_all_applicants,
+                              methods=['GET'])
         self.app.add_url_rule('/applicants/all/<string:applicant_area>',
                               view_func=self.get_all_applicants,
                               methods=['GET'])
@@ -52,7 +62,7 @@ class BackendRestServer:
                               methods=['POST'])
         self.app.add_url_rule('/authenticate',
                               view_func=self.authentication_check,
-                              methods=['GET'])
+                              methods=['POST'])
         self.app.add_url_rule('/applicants/<string:applicant_type>/<string:object_id>',
                               view_func=self.update_applicant,
                               methods=['PUT'])
@@ -64,7 +74,7 @@ class BackendRestServer:
                               methods=['PATCH'])
 
     @staticmethod
-    def create_area_filter(applicant_area: str) -> Optional[dict[str: str]]:
+    def create_area_filter(applicant_area: Optional[str]) -> Optional[dict[str: str]]:
         if applicant_area:
             return {'area': applicant_area}
 
@@ -119,13 +129,12 @@ class BackendRestServer:
         with MongoDBContextManager('requests') as mongo:
             area_filter = self.create_area_filter(applicant_area)
             requests_data = list(mongo.collection.find(area_filter))
-
             mongo.set_collection('offers')
             offers_data = list(mongo.collection.find(area_filter))
 
-            all_data = jsonify({'requests_data_list': requests_data,
-                                'offers_data_list': offers_data})
-            
+            all_data = jsonify(json_util.dumps({'requests': requests_data,
+                                                'offers': offers_data}))
+                   
         return all_data, HTTPStatus.OK
 
     def get_applicants(self,
@@ -203,4 +212,6 @@ class BackendRestServer:
         return jsonify({'Exception': f'{'Updated successfully'}'}), HTTPStatus.OK
 
     def run(self) -> None:
-        self.app.run(host=BackendRestServer.IP, port=BackendRestServer.PORT, debug=True)
+        self.app.run(host=BackendRestServer.LOCAL_HOST if BackendRestServer.DEBUG else BackendRestServer.IP,
+                     port=BackendRestServer.PORT,
+                     debug=BackendRestServer.DEBUG)
