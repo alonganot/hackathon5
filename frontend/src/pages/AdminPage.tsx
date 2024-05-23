@@ -4,13 +4,16 @@ import { FormAnswer } from "../types/FormAnswer"
 import { areas } from "./FormPage"
 import { api } from "../api"
 import '../styles/AdminPage.css'
+import { BSON } from "bson"
 
 function AdminPage() {
 
   const [attemptedPass, setAttemptedPass] = useState(false)
   const [password, setPassword] = useState("")
-  const handleSubmit = (event)=>{
+  const handleSubmit = async (event: ChangeEvent<HTMLInputElement>)=>{
     event.preventDefault()
+    let token = await api().auth().verify(password)
+    localStorage.setItem("token", token)
     setAttemptedPass(true)
     // move to home page as 
   }
@@ -25,20 +28,19 @@ function AdminPage() {
         onChange={(e)=>setPassword(e.target.value)}/>
       </form>}
 
-      {attemptedPass && <Lists password={password}/>}
+      {attemptedPass && <Lists/>}
     </>
   )
 }
 
-function Lists({password}: {password: string}){
+function Lists(){
   const [offerEntries, setOfferEntries] = useState<FormAnswer[]>([])
   const [requestEntries, setRequestEntries] = useState<FormAnswer[]>([])
   const [regionalFilter, setRegionalFilter]= useState<string[]>([])
   useEffect(()=>{
-    console.log(password)
     const fetchData = async ()=>{
-    let entries = await api().all().getAll(password)
-    console.log(entries)
+    let codedEntries = await api().all().getAll()
+    let entries = (JSON.parse(codedEntries))
     setOfferEntries(entries.offers)
     setRequestEntries(entries.requests)
     }
@@ -74,7 +76,7 @@ function Lists({password}: {password: string}){
       <div className="lists-container">
       <h2>offer List</h2>
       <ul>
-       { offerEntries.filter(offer=> !regionalFilter  || offer.area.some(relevantRegion =>  regionalFilter.includes(relevantRegion)))
+       {offerEntries && offerEntries.filter(offer=> !regionalFilter  || offer.area.some(relevantRegion =>  regionalFilter.includes(relevantRegion)))
         .map((item, index)=>(
           <li key = {index}>{item.email}</li>
         ))}
@@ -82,7 +84,7 @@ function Lists({password}: {password: string}){
 
       <h2>Request List</h2>
       <ul>
-      {requestEntries.filter(request=> !regionalFilter || request.area.some(relevantRegion=>  regionalFilter.includes(relevantRegion)))
+      {requestEntries && requestEntries.filter(request=> !regionalFilter || request.area.some(relevantRegion=>  regionalFilter.includes(relevantRegion)))
       .map((item, index) => (
           <li key = {index}>{item.email}</li>
         ))}
