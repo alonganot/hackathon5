@@ -1,9 +1,9 @@
 from json import load
 from pathlib import Path
 from http import HTTPStatus
+from logging import getLogger
 from typing import Optional, Union
 from bcrypt import gensalt, hashpw
-from logging import getLogger, INFO
 from bson import json_util, ObjectId
 
 from flask_cors import CORS
