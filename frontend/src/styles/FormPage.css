@@ -1,16 +1,11 @@
 .form {
-  margin-top: 5vh;
-  width: 100vw;
-  position: relative;
-  top: 30%;
-  left: 70%;
-  transform: translate(-50%, -50%);
 }
 
 div.settings {
   display: grid;
-  grid-template-columns: max-content max-content;
-  grid-gap: 5px;
+  grid-template-columns: 1fr 1fr;
+  grid-gap: 8px;
+  width: fit-content;
 }
 
 div.settings label {
@@ -18,7 +13,7 @@ div.settings label {
 }
 
 .text {
-  width: 30vw;
+  width: 240px;
 }
 
 #areas {
@@ -89,20 +84,13 @@ input.text {
 }
 
 .background {
-  width: 800px;
-  height: 800px;
+  width: fit-content;
+  height: fit-content;
   border-radius: 20px;
   background-color: #ffedd1;
-  border: 0;
-  outline: 0;
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  /* display: flex; */
-  /* align-items: center; */
-  padding-top: 10px;
-  justify-content: center;
+  font-family: heebo;
+  margin: 60px auto;
+  padding: 40px 80px;
 }
 
 .submit {
@@ -113,6 +101,9 @@ input.text {
   height: 3vw;
   width: 10vw;
   cursor: pointer;
-  justify-content: center;
+}
+
+.button {
   display: flex;
+    justify-content: center;
 }

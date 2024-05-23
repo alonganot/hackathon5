@@ -68,7 +68,7 @@ function FormPage() {
 
     return (
         <>
-        
+            <Navbar></Navbar>
             <div className="background">
                 <div className="form">
 
@@ -98,18 +98,18 @@ function FormPage() {
                         <p>אני רוצה:</p>
                         <div>
                             <input type="radio" id="html" name="goal" value="organize" onChange={handleChange} />
-                            <label htmlFor="html">להתנדב להעביר פעילות/הפעלה</label><br />
+                            <label htmlFor="html">אני מעוניין ליזום פעילות התנדבותית כלשהי</label><br />
                         </div>
                         <div>
                             <input type="radio" id="css" name="goal" value="help" onChange={handleChange} />
-                            <label htmlFor="css">להתנדב לעזור עם המשפחות/פעילות/הפעלה</label><br />
+                            <label htmlFor="css">להתנדב לעזור בפעילות קיימת</label><br />
                         </div>
                         {
                             formAnswer.goal === 'organize' &&
                             <div className="settings">
-                                <label htmlFor="description">איזה פעילות תוכל/י להעביר? ספר/י בקצרה</label><br />
-                                <input className="text" name="description" onChange={handleChange} /> <br />
-                                <label htmlFor="audience">מה קהל היעד של הפעילות שלך?</label><br />
+                                <label htmlFor="description">איזה פעילות תוכל/י להעביר? ספר/י בקצרה</label>
+                                <input className="text" name="description" onChange={handleChange} /> 
+                                <label htmlFor="audience">מה קהל היעד של הפעילות שלך?</label>
                                 <input className="text" name="audience" onChange={handleChange} /> <br />
                             </div>
                         }
@@ -138,7 +138,7 @@ function FormPage() {
                         </div>
                     </div>
                 }
-                <div>
+                <div className="button">
                     <button className="text submit" onClick={submitForm}>שליחה</button>
                 </div>
             </div>
