@@ -18,7 +18,7 @@ server_log = getLogger(__name__)
 class BackendRestServer:
     IP = 'localhost'
     PORT = 1360
-    CORS_ORIGINS = '*'
+    CORS_ORIGINS = ['localhost', '172.30.107.20']
 
     JWT_ALGORITHM = 'HS256'
 
