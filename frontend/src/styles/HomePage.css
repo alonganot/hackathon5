@@ -26,7 +26,124 @@
 
 .buttons{
     display: flex;
-    position: absolute;
-    left: 80px;
+    position: fixed;
+    left: 60px;
     bottom: 40px;
+    gap: 20px;
+    z-index: 20;
+}
+
+.button{
+    background-color: aqua;
+    padding: 8px 20px;
+    border-radius: 20px;
+    font-weight: 700;
+    transition: 100ms;
+
+}
+
+#route-link-offer{
+    background-color: #83ffbc;
+    color: #454545;
+}
+#route-link-offer:hover{
+    transform: scale(1.05);
+}
+
+#route-link-request{
+    background-color: #ffd983;
+    color: #454545;
+}
+
+#route-link-request:hover{
+    transform: scale(1.05);
+}
+
+#bottomgrid{
+    display: grid;
+    position: relative;
+    top: -180px;
+    margin:0px 20px;
+    gap: 40px;
+    grid-template-columns:repeat(3, 1fr);
+    color:#454545;
+}
+.bottomgridTitle{
+    font-size:24px;
+    font-weight:700;
+    text-align:center;
+    padding-bottom: 20px;
+}
+
+.bottomgridText{
+    font-family:18px;
+    font-weight:300;
+    margin:0px 20px;
+    text-align: justify;
+}
+
+.mapbutton{
+    height: 12px;
+    width: 12px;
+    background-color: #454545;
+    position: absolute;
+    border-radius: 20px;
+    border: 0px;
+    transition: 400ms;
+}
+
+.photo{
+    height: inherit;
+    width: inherit;
+    background-color: #454545;
+    position: absolute;
+    border-radius: 8px;
+    
+}
+
+.photocontainer{
+    z-index: 7;
+    transition: 600ms;
+    
+}
+
+.bottomtext{
+    text-align: center;
+    bottom: 0px;
+    position: absolute;
+    font-weight: 700;
+    width: inherit;
+    transform: translateY(0px);
+    transition: 1600ms;
+}
+
+.mapbutton:hover {
+    background-color:#707070;
+    /* transform: scale(1.5); */
+}
+
+.mapbutton:hover .photocontainer{
+    transform: translate(-200px,0px) scale(1) !important; 
+}
+
+.mapbutton:hover .bottomtext{
+    transform: translateY(30px);
+}
+
+#photo1{
+    height: 219px;
+    width: 295px;
+    transform: translate(137px,-100px) scale(0);
+}
+
+#photo2{
+    height: 252px;
+    width: 203px;
+    transform: translate(95px,-120px) scale(0);
+}
+
+#photo3{
+    height: 343px;
+    width: 239px;
+    transform: translate(113px,-172px) scale(0);
 }
