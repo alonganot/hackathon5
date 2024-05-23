@@ -3,6 +3,7 @@ from logging import getLogger
 from typing import Optional, Union
 from bcrypt import gensalt, hashpw
 from bson import json_util, ObjectId
+from socket import gethostbyname, gethostname
 
 from flask_cors import CORS
 from pymongo.errors import PyMongoError
@@ -16,9 +17,12 @@ server_log = getLogger(__name__)
 
 
 class BackendRestServer:
-    IP = 'localhost'
+    DEBUG = True
+
+    LOCAL_HOST = 'localhost'
+    IP = gethostbyname(gethostname())
     PORT = 8000
-    CORS_ORIGINS = ['localhost', '172.30.107.20']
+    CORS_ORIGINS = '*'  # [LOCAL_HOST, IP, '172.30.107.20']
 
     JWT_ALGORITHM = 'HS256'
 
@@ -205,4 +209,6 @@ class BackendRestServer:
         return jsonify({'Exception': f'{'Updated successfully'}'}), HTTPStatus.OK
 
     def run(self) -> None:
-        self.app.run(host=BackendRestServer.IP, port=BackendRestServer.PORT, debug=True)
+        self.app.run(host=BackendRestServer.LOCAL_HOST if BackendRestServer.DEBUG else BackendRestServer.IP,
+                     port=BackendRestServer.PORT,
+                     debug=BackendRestServer.DEBUG)
