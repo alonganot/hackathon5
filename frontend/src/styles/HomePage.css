@@ -33,12 +33,13 @@
     z-index: 20;
 }
 
+
 .button{
     padding: 8px 20px;
     border-radius: 20px;
     font-weight: 700;
     transition: 100ms;
-
+    box-shadow: 0px 4px 12px #00000020;
 }
 
 #route-link-offer{
@@ -146,3 +147,34 @@
     width: 239px;
     transform: translate(113px,-172px) scale(0);
 }
+
+#ops{
+    position: relative;
+    top:100px;
+    font-size: 32px;
+    font-weight: 700;
+    font-family: Heebo;
+    text-align: center;
+}
+
+#footer{
+    grid-template-columns: min-content 1fr 1fr;
+}
+
+#main-video{
+    height: inherit;
+    position: relative;
+    /* filter: blur(0px); */
+}
+
+/* #main-video:hover::before{
+    height: inherit;
+    position: relative;
+    filter: blur(4px);
+}
+
+#main-video:hover::after{
+    height: inherit;
+    position: relative;
+    filter: blur(0px);
+} */
