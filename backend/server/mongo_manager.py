@@ -7,7 +7,7 @@ from pymongo.collection import Collection
 
 from typing_extensions import Self
 
-from backend.server.get_secrets import GetSecrets
+from server.get_secrets import GetSecrets
 
 mongo_log = getLogger(__name__)
 

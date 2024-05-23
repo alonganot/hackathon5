@@ -9,8 +9,8 @@ from pymongo.errors import PyMongoError
 from flask import Flask, jsonify, request, Response
 from jwt import encode as jwt_encode, decode as jwt_decode, InvalidTokenError, ExpiredSignatureError
 
-from get_secrets import GetSecrets
-from mongo_manager import MongoDBContextManager
+from server.get_secrets import GetSecrets
+from server.mongo_manager import MongoDBContextManager
 
 server_log = getLogger(__name__)
 
