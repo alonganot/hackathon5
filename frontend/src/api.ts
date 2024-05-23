@@ -12,7 +12,7 @@ export const api = () => {
                             url: `${import.meta.env.VITE_SERVER_URL}/applicants/requests`,
                             headers: {},
                             data: {
-                                request
+                                ...request
                             }
                         });
                         console.log(res?.data);
