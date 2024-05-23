@@ -1,0 +1,28 @@
+name: OpenShift Build on Main Push
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v3
+
+    - name: Set up OpenShift CLI
+      run: |
+        curl -LO https://mirror.openshift.com/pub/openshift-v4/clients/oc/latest/linux/oc.tar.gz
+        tar -xvf oc.tar.gz
+        sudo mv oc /usr/local/bin/
+
+    - name: Log in to OpenShift
+      run: oc login --token=$OPENSHIFT_TOKEN --server='https://api.cluster-67msc.67msc.sandbox2228.opentlc.com:6443
+      env:
+        OPENSHIFT_TOKEN: ${{ secrets.OPENSHIFT_TOKEN }}
+
+    - name: Start OpenShift build
+      run: oc start-build myapp-build

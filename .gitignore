@@ -1,0 +1,4 @@
+# IDE development files
+workspace.xml
+.idea
+.vscode

@@ -3,3 +3,6 @@ pymongo
 typing_extensions
 pyjwt
 flask-cors
+bcrypt
+kubernetes
+uvicorn

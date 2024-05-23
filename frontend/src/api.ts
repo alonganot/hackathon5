@@ -26,16 +26,17 @@ export const api = () => {
         },
         offers() {
             return {
-                async create(request: FormAnswer): Promise<string> {
+                async create(offer: FormAnswer): Promise<string> {
                     try {
                         const res = await axios({
                             method: 'post',
                             url: `${import.meta.env.VITE_SERVER_URL}/applicants/offers`,
                             headers: {},
                             data: {
-                                request
+                                ...offer
                             }
                         });
+
                         console.log(res?.data);
                         return res?.data.id
                     } catch (error) {
@@ -47,13 +48,40 @@ export const api = () => {
         },
         all() {
             return {
-                async getAll(): Promise<{ requests: FormAnswer[], offers: FormAnswer[] }> {
+                async getAll(): Promise<string> {
                     try {
-                        const res = await axios.get(`${import.meta.env.VITE_SERVER_URL}/applicants/all`)
+                        console.log(2222)
+                        const res = await axios({
+                            method: 'get',
+                            url: `${import.meta.env.VITE_SERVER_URL}/applicants/all`,
+                            headers: {Token: localStorage.getItem("token")}
+                        });
+                        console.log()
                         return res?.data
                     } catch (error) {
                         console.log(error)
-                        return { requests: [], offers: [] }
+                        return ""
+                    }
+                },
+            }
+        }, 
+        auth() {
+            return {
+                async verify(password: string): Promise<string> {
+                    try {
+                        const res = await axios({
+                            method: 'post',
+                            url: `${import.meta.env.VITE_SERVER_URL}/authenticate`,
+                            headers: {},
+                            data: {
+                                password
+                            }
+                        });
+                        console.log(res?.data)
+                        return res?.data?.token
+                    } catch (error) {
+                        console.log(error)
+                        return  ""
                     }
                 },
             }

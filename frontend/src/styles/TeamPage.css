@@ -1,0 +1,13 @@
+.outer {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr 1fr;
+    padding: 7vh;
+}
+
+.person {
+    width: 25vw;
+}
+
+img {
+    border-radius: 90px;
+}
