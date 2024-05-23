@@ -1,5 +1,4 @@
-import { useNavigate, useParams } from "react-router-dom"
-import Navbar from "../components/Navbar"
+import { Link, useNavigate, useParams } from "react-router-dom"
 import "../styles/FormPage.css"
 import { ChangeEvent, useState } from "react"
 import { FormAnswer } from "../types/FormAnswer"
@@ -70,23 +69,31 @@ function FormPage() {
 
     return (
         <>
-            <Navbar />
-            <div className="form">
-                <label htmlFor="email">אימייל</label>
-                <input className="text" name="email" onChange={handleChange} /> <br />
-                <label htmlFor="fullname">שם מלא</label>
-                <input className="text" name="fullname" onChange={handleChange} /> <br />
-                <label htmlFor="phone">פלאפון ליצירת קשר</label>
-                <input className="text" name="phone" onChange={handleChange} />
-                <div>
-                    <p>איזור בארץ</p>
-                    <div id="areas">
-                        {areas.map((area, index) => (
-                            <div key={index} style={{ width: "33%" }}>
-                                <input type="checkbox" id={area.value} name="area" value={area.value} onChange={handleChange} />
-                                <label htmlFor={area.value}>{area.name}</label><br />
-                            </div>
-                        ))}
+            <div className="background">
+                <Link id="route-link-back" to={"/"}>
+                    <img src="..\..\..\back-button.svg" className="back"></img>
+                </Link>
+                <div className="form">
+
+                    <div className="settings">
+                        <label htmlFor="email">אימייל</label>
+                        <input className="text" name="email" onChange={handleChange} />
+                        <label htmlFor="fullname">שם מלא</label>
+                        <input className="text" name="fullname" onChange={handleChange} />
+                        <label htmlFor="phone">מספר טלפון</label>
+                        <input className="text" name="phone" onChange={handleChange} />
+                    </div>
+
+                    <div>
+                        <p>איזור בארץ</p>
+                        <div id="areas">
+                            {areas.map((area, index) => (
+                                <div key={index} style={{ width: "33%" }}>
+                                    <input type="checkbox" id={area.value} name="area" value={area.value} onChange={handleChange} />
+                                    <label htmlFor={area.value}>{area.name}</label><br />
+                                </div>
+                            ))}
+                        </div>
                     </div>
                 </div>
                 {
@@ -94,18 +101,18 @@ function FormPage() {
                         <p>אני רוצה:</p>
                         <div>
                             <input type="radio" id="html" name="goal" value="organize" onChange={handleChange} />
-                            <label htmlFor="html">להתנדב להעביר פעילות/הפעלה</label><br />
+                            <label htmlFor="html">אני מעוניין ליזום פעילות התנדבותית כלשהי</label><br />
                         </div>
                         <div>
                             <input type="radio" id="css" name="goal" value="help" onChange={handleChange} />
-                            <label htmlFor="css">להתנדב לעזור עם המשפחות/פעילות/הפעלה</label><br />
+                            <label htmlFor="css">להתנדב לעזור בפעילות קיימת</label><br />
                         </div>
                         {
                             formAnswer.goal === 'organize' &&
-                            <div>
-                                <label htmlFor="description">איזה פעילות תוכל/י להעביר? ספר/י בקצרה</label><br />
-                                <input className="text" name="description" onChange={handleChange} /> <br />
-                                <label htmlFor="audience">מה קהל היעד של הפעילות שלך?</label><br />
+                            <div className="settings">
+                                <label htmlFor="description">איזו פעילות תוכל/י להעביר? ספר/י בקצרה</label>
+                                <input className="text" name="description" onChange={handleChange} />
+                                <label htmlFor="audience">מה קהל היעד של הפעילות שלך?</label>
                                 <input className="text" name="audience" onChange={handleChange} /> <br />
                             </div>
                         }
@@ -120,19 +127,23 @@ function FormPage() {
                 }
                 {
                     purpose == "request" && <div className="form">
-                        <label htmlFor="city">יישוב</label>
-                        <input className="text" name="city" onChange={handleChange} /> <br />
-                        <label htmlFor="familystatus">מצב משפחתי (רווק/פלוס/וכד)</label>
-                        <input className="text" name="familystatus" onChange={handleChange} /> <br />
-                        <label htmlFor="childrenage">גילאי הילדים</label>
-                        <input className="text" name="childrenage" onChange={handleChange} /> <br />
-                        <label htmlFor="hotel">באיזה מלון אתם?</label>
-                        <input className="text" name="hotel" onChange={handleChange} /> <br />
-                        <label htmlFor="comments">הערות נוספות/משהו חשוב שנדע...</label>
-                        <input className="text" name="comments" onChange={handleChange} /> <br />
+                        <div className="settings">
+                            <label htmlFor="city">יישוב</label>
+                            <input className="text" name="city" onChange={handleChange} />
+                            <label htmlFor="familystatus">מצב משפחתי(רווק/נשוי/גרוש/אלמן/אחר)</label>
+                            <input className="text" name="familystatus" onChange={handleChange} />
+                            <label htmlFor="childrenage">מספר וגיל הילדים</label>
+                            <input className="text" name="childrenage" onChange={handleChange} />
+                            <label htmlFor="hotel">היכן מתגורר כרגע?</label>
+                            <input className="text" name="hotel" onChange={handleChange} />
+                            <label htmlFor="comments">כללי - במה נוכל לעזור לך?</label>
+                            <input className="text" name="comments" onChange={handleChange} /> <br />
+                        </div>
                     </div>
                 }
-                <button className="text" onClick={submitForm}>שליחה</button>
+                <div className="button">
+                    <button className="text submit" onClick={submitForm}>שליחה</button>
+                </div>
             </div>
         </>
     )
