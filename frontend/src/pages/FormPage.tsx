@@ -1,5 +1,4 @@
-import { useNavigate, useParams } from "react-router-dom"
-import Navbar from "../components/Navbar"
+import { Link, useNavigate, useParams } from "react-router-dom"
 import "../styles/FormPage.css"
 import { ChangeEvent, useState } from "react"
 import { FormAnswer } from "../types/FormAnswer"
@@ -68,8 +67,10 @@ function FormPage() {
 
     return (
         <>
-            <Navbar></Navbar>
             <div className="background">
+            <img src="..\src\assets\back-button.svg" className="back">
+                {/* <Link to='/'></Link> */}
+            </img>
                 <div className="form">
 
                     <div className="settings">
@@ -107,8 +108,8 @@ function FormPage() {
                         {
                             formAnswer.goal === 'organize' &&
                             <div className="settings">
-                                <label htmlFor="description">איזה פעילות תוכל/י להעביר? ספר/י בקצרה</label>
-                                <input className="text" name="description" onChange={handleChange} /> 
+                                <label htmlFor="description">איזו פעילות תוכל/י להעביר? ספר/י בקצרה</label>
+                                <input className="text" name="description" onChange={handleChange} />
                                 <label htmlFor="audience">מה קהל היעד של הפעילות שלך?</label>
                                 <input className="text" name="audience" onChange={handleChange} /> <br />
                             </div>
@@ -127,13 +128,13 @@ function FormPage() {
                         <div className="settings">
                             <label htmlFor="city">יישוב</label>
                             <input className="text" name="city" onChange={handleChange} />
-                            <label htmlFor="familystatus">מצב משפחתי (רווק/פלוס/וכד)</label>
+                            <label htmlFor="familystatus">מצב משפחתי(רווק/נשוי/גרוש/אלמן/אחר)</label>
                             <input className="text" name="familystatus" onChange={handleChange} />
-                            <label htmlFor="childrenage">גילאי הילדים</label>
+                            <label htmlFor="childrenage">מספר וגיל הילדים</label>
                             <input className="text" name="childrenage" onChange={handleChange} />
-                            <label htmlFor="hotel">באיזה מלון אתם?</label>
+                            <label htmlFor="hotel">היכן מתגורר כרגע?</label>
                             <input className="text" name="hotel" onChange={handleChange} />
-                            <label htmlFor="comments">הערות נוספות/משהו חשוב שנדע...</label>
+                            <label htmlFor="comments">כללי - במה נוכל לעזור לך?</label>
                             <input className="text" name="comments" onChange={handleChange} /> <br />
                         </div>
                     </div>
@@ -142,7 +143,6 @@ function FormPage() {
                     <button className="text submit" onClick={submitForm}>שליחה</button>
                 </div>
             </div>
-            {/* </div> */}
         </>
     )
 }
