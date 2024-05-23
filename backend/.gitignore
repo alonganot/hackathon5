@@ -13,6 +13,3 @@ workspace.xml
 env/
 venv/
 ENV/
-
-# Secrets File
-config.json
