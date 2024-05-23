@@ -19,7 +19,6 @@ function AdminPage() {
   return (
     <>
       <Navbar />
-      <h1>Admin</h1>
       {!attemptedPass && <form onSubmit={handleSubmit}>
         <label>Enter your password</label>
         <input type="text"
@@ -61,10 +60,10 @@ function Lists(){
     <>
     {/* this is copypaste for checking boxes  */}
        <div>
-          <p>איזור בארץ</p>
+          <h2>איזור בארץ</h2>
           <div id="areas">
               {areas.map((area, index) => (
-                  <div key={index} style={{ width: "33%" }}>
+                  <div key={index} style={{ width: "20%" }}>
                       <input type="checkbox" id={area.value} name="area" value={area.value}
                       onChange={handleChange}  />
                       <label htmlFor={area.value}>{area.name}</label><br />
@@ -74,21 +73,34 @@ function Lists(){
       </div>
 { !loading && 
     <div className="lists-container">
-      <h2>offer List</h2>
+      <div className="list-container">
+
+      <h2>רשימת הצעות</h2>
       <ul>
        {offerEntries.length > 0 && offerEntries.filter((offer)=> regionalFilter.length === 0  || offer.area?.some(relevantRegion =>  regionalFilter.includes(relevantRegion)))
         .map((item, index)=>(
-          <li key = {index}>{item.email}</li>
+          <div>
+            <li key = {index}>{item.email} - {item.fullname}</li>
+            { item.goal === "help" && <p className="smalltext">עזרה כללית</p>}
+            { item.flexibility ? <p className="greentext">גמיש בשעות</p> : <p className="redtext">לא גמיש בשעות</p>}
+          </div>
         ))}
       </ul>
-
-      <h2>Request List</h2>
+        </div>
+      <div className="list-container">
+      <h2>רשימת בקשות</h2>
       <ul>
       {requestEntries.length > 0 && requestEntries.filter(request=> regionalFilter.length === 0 || request.area?.some(relevantRegion=>  regionalFilter.includes(relevantRegion)))
       .map((item, index) => (
-          <li key = {index}>{item.email}</li>
+        <div>
+          <li key = {index}>{item.email} - { item.fullname }</li>
+          <p className="smalltext">{item.phone}</p>
+          <p className="smalltext">{item.familystatus} - {item.childrenage} </p>
+
+        </div>
         ))}
       </ul>
+      </div>
       </div>
 }
     </>
